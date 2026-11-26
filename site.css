@@ -35,6 +35,8 @@ th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);font
 .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;white-space:pre-wrap;font-size:15px}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.btn{display:inline-block;border-radius:10px;padding:10px 16px;font-weight:700;font-size:15px;border:1px solid var(--line);background:var(--card)}.btn.p{background:var(--accent);color:#fff;border-color:var(--accent)}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.filters select,.filters input{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.sorts{display:flex;flex-wrap:wrap;align-items:center;gap:4px;background:#eef2fb;border-radius:999px;padding:4px;width:max-content;max-width:100%;margin:4px 0 14px}.sorts button{font:inherit;font-size:13.5px;font-weight:600;border:0;background:transparent;color:var(--sub);padding:7px 14px;border-radius:999px;cursor:pointer}.sorts button.on{background:var(--accent);color:#fff}.sorts .reset{font-size:13px;color:var(--sub);padding:0 10px;cursor:pointer;text-decoration:underline}
+.herosearch{display:flex;gap:8px;margin-top:16px}.herosearch input{flex:1;font:inherit;font-size:15px;padding:11px 14px;border-radius:12px;border:0}.herosearch button{font:inherit;font-weight:700;padding:0 18px;border-radius:12px;border:0;background:#0f2f8f;color:#fff;cursor:pointer}
 .note{font-size:13px;color:var(--sub);margin-top:10px}
 .ad{border:1px dashed #c8ced8;border-radius:12px;color:#9aa3b1;font-size:13px;text-align:center;padding:22px;margin:22px 0;background:#fbfbfc}
 footer{margin:50px 0 30px;font-size:13px;color:var(--sub);border-top:1px solid var(--line);padding-top:18px}
