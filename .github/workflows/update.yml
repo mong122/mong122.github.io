@@ -9,6 +9,8 @@ on:
   schedule:
     - cron: "17 */4 * * *"   # 4시간마다 (UTC 기준 — 한국 시각 1·5·9·13·17·21시 17분쯤). 깃허브 예약은 늦거나 빠질 수 있음
   workflow_dispatch:
+  push:                      # PC 가 만드는 도구·자료를 올렸을 때도 한 번 (11/27 시험 겸)
+    paths: ["_src/**", ".github/workflows/update.yml"]
   repository_dispatch:
 permissions:
   contents: write
