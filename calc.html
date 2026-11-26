@@ -1,6 +1,20 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>연봉 실수령액 계산기 | 몽 채용노트</title><meta name="description" content="연봉 실수령액 계산기"><meta name="robots" content="noindex,follow"><link rel="stylesheet" href="site.css?v=mwxo64kh"></head><body>
+<title>연봉 실수령액 계산기 (2026) | 몽 채용노트</title><meta name="description" content="2026년 연봉 실수령액 계산기 — 4대 보험·소득세를 빼고 한 달에 받는 돈"><meta name="robots" content="noindex,follow"><link rel="stylesheet" href="site.css?v=mwxo7y51"></head><body>
 <header class="top"><div class="wrap"><a class="logo" href="index.html">몽 <b>채용노트</b></a>
 <nav><a href="index.html" class="">이번 주 마감</a><a href="jobs.html" class="">전체 공고</a><a href="pay-rank.html" class="">초임 순위</a><a href="calc.html" class="on">실수령 계산기</a><a href="saved.html" class="">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>
-<main class="wrap"><h1>연봉 실수령액 계산기</h1><p class="lead">다음 차례에 만들어요 (계획: 연봉 → 4대 보험·세금 뺀 한 달 실수령, 공고 쪽 초봉과 이음).</p></main><script src="site.js?v=mwxo64kh"></script>
+<main class="wrap"><h1>연봉 실수령액 계산기 <span class="note">2026년 기준</span></h1>
+<p class="lead">연봉을 넣으면 한 달에 실제로 받는 돈을 계산해요. 초임 순위나 공고 쪽에서 넘어오면 그 초임이 들어가 있어요.</p>
+<div class="box" style="white-space:normal"><div class="calc">
+<label>연봉 (세금 떼기 전)<span class="inwrap"><input id="cy" inputmode="numeric" value="4000"> 만 원</span></label>
+<label>한 달 비과세 (식대 등)<span class="inwrap"><input id="cn" inputmode="numeric" value="20"> 만 원</span></label>
+<label>공제 대상 가족 (본인 포함)<span class="inwrap"><select id="cf"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option></select> 명</span></label>
+<label>그중 8~20세 자녀<span class="inwrap"><select id="ck"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option></select> 명</span></label>
+</div></div>
+<div class="result"><div class="big"><span>한 달 실수령 (대략)</span><b id="rNet">-</b></div><table id="rT"></table><p class="note" id="rNote"></p></div>
+<div class="box" style="white-space:normal;margin-top:16px"><b>어떻게 계산하나요</b>
+<div>· 월급 = 연봉 ÷ 12. 비과세(식대 등)를 뺀 금액에 4대 보험을 매겨요.</div>
+<div>· 국민연금 4.75% (매기는 월급에 위·아래 한도가 있어요) · 건강보험 3.595% · 장기요양 = 건강보험료의 13.14% · 고용보험 0.9% — 2026년 근로자 몫이에요.</div>
+<div>· 소득세는 국세청 "근로소득 간이세액표"로 찾고, 지방소득세는 소득세의 10%예요.</div>
+<div>· 실제 급여는 수당·상여가 나오는 달, 회사의 비과세 항목, 연말정산에 따라 달라져요. 대략 보는 용도로 써 주세요.</div></div>
+<script>window.TAX=null;</script><script src="calc.js?v=mwxo7y51"></script></main><script src="site.js?v=mwxo7y51"></script>
 <footer class="wrap">공고 정보는 잡알리오(공공기관 채용정보시스템) 자료예요. 지원 전에 꼭 원문 공고를 확인하세요. · <a href="about.html" style="text-decoration:underline">소개</a> · <a href="privacy.html" style="text-decoration:underline">개인정보처리방침</a> · 2026-11-26 기준</footer></body></html>
