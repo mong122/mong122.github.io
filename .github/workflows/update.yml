@@ -1,0 +1,47 @@
+# 🌐 4시간마다 공고 새로 받기 (11/27 — PC 가 꺼져 있어도 깃허브가 돌림)
+#   키 = 저장소 Settings → Secrets and variables → Actions → New repository secret
+#     DATA_GO_KR_KEY : 공공데이터포털 일반 인증키 (잡알리오·나라일터·클린아이)
+#     WORK24_KEY     : 고용24 공채속보 인증키
+#   키가 없으면 받기는 건너뛰고, PC 가 올려 둔 자료(_src/data)로 사이트만 다시 만듦 (D-day·마감 지난 공고 정리)
+#   손으로 돌리기 = 저장소 Actions → "공고 새로 받기" → Run workflow
+name: 공고 새로 받기
+on:
+  schedule:
+    - cron: "17 */4 * * *"   # 4시간마다 (UTC 기준 — 한국 시각 1·5·9·13·17·21시 17분쯤). 깃허브 예약은 늦거나 빠질 수 있음
+  workflow_dispatch:
+  repository_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: site-update
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 공고 받기 (키가 있는 창구만)
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          WORK24_KEY: ${{ secrets.WORK24_KEY }}
+        run: node _src/fetch.js
+      - name: 알리오 초임 (7일 지난 기관만)
+        run: node _src/entry.js || true
+      - name: 사이트 만들기
+        env:
+          SITE_OUT: ${{ runner.temp }}/out
+        run: node _src/build.js
+      - name: 올리기
+        run: |
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name _src ! -name .github -exec rm -rf {} +
+          cp -r "$RUNNER_TEMP/out/." .
+          git config user.name "mong-bot"
+          git config user.email "mong-bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "바뀐 것 없음"; exit 0; fi
+          git commit -q -m "공고 새로 받음 $(TZ=Asia/Seoul date '+%F %H:%M')"
+          git push
