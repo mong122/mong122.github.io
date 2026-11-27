@@ -100,8 +100,28 @@ async function w24() {
   return out;
 }
 
+// 🎁 정부24 공공서비스(보조금24) 전체 — 지원금 허브 (11/27) · 같은 공공데이터 키 · 1,000개씩
+async function gov24() {
+  const all = [];
+  for (let page = 1; page <= 20; page++) {
+    const u = new URL('https://api.odcloud.kr/api/gov24/v3/serviceList');
+    for (const [k, v] of Object.entries({ page: String(page), perPage: '1000', serviceKey: GOV })) u.searchParams.set(k, v);
+    const t = await get(u);
+    if (t.trim().startsWith('<')) throw new Error('보조금24: ' + (authErr(t) || t.slice(0, 120)));
+    const j = JSON.parse(t);
+    const rows = j.data || [];
+    all.push(...rows);
+    if (rows.length < 1000) break;
+  }
+  const cut = (s, n) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, n);
+  return all.map((x) => ({
+    id: x['서비스ID'], name: cut(x['서비스명'], 80), sum: cut(x['서비스목적요약'], 120), org: cut(x['소관기관명'], 40), field: x['서비스분야'] || '', type: x['지원유형'] || '', user: x['사용자구분'] || '',
+    who: cut(x['지원대상'], 220), what: cut(x['지원내용'], 260), how: cut(x['신청방법'], 120), when: cut(x['신청기한'], 80), url: x['상세조회URL'] || '', views: Number(x['조회수']) || 0, upd: toIso(x['수정일시'] || x['등록일시']),
+  })).filter((x) => x.id && x.name);
+}
+
 (async () => {
-  const jobs = [['alio', alio, GOV], ['gojobs', gojobs, GOV], ['cleaneye', cleaneye, GOV], ['w24', w24, W24]];
+  const jobs = [['alio', alio, GOV], ['gojobs', gojobs, GOV], ['cleaneye', cleaneye, GOV], ['w24', w24, W24], ['gov24', gov24, GOV]];
   let fail = 0;
   for (const [k, fn, key] of jobs) {
     if (!key) { console.log(`- ${k}: 키 없음 → 전에 받은 자료 그대로`); continue; }
