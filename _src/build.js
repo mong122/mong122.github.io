@@ -277,7 +277,7 @@ for (const x of items) {
       return `<li>${esc(l.replace(/^(?:\d{1,2}[.)]|[가-하][.)]|[①-⑳]|[□■ㅇ○●•·\-–→]|\(\d+\))\s*/, ''))}</li>`;
     }).join('');
     // 원문은 접기/펴기 (11/27 제미나이 2: 위에서 정리했는데 아래 원문이 길게) — 우리 정리가 없는 쪽은 펼친 채로
-    return `<details class="orig"${b && b.draft ? '' : ' open'}><summary>${h} <span class="note">공고문 원문</span></summary><div class="box list"><ul>${html}</ul></div></details>`;
+    return `<details class="orig"${b && b.draft ? '' : ' open'}><summary>${h}</summary><div class="box list"><ul>${html}</ul></div></details>`;
   };
   fs.writeFileSync(path.join(OUT, 'job', x.id + '.html'), page(`${x.inst} 채용 ${titleClean(x.title)}`, `
 <div class="crumb"><a href="../index.html">처음</a> › <a href="../jobs.html">전체 공고</a> › ${esc(x.inst)}</div>
