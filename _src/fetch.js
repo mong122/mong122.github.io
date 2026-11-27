@@ -100,6 +100,26 @@ async function w24() {
   return out;
 }
 
+// 🏠 LH 분양·임대 공고 (공고중) — 사이트 "LH 공고" 칸 (11/27, 설치판 apis.js lh 와 같은 칸)
+async function lh() {
+  const all = [];
+  let total = Infinity;
+  for (let page = 1; all.length < total && page <= 10; page++) {
+    const u = new URL('https://apis.data.go.kr/B552555/lhLeaseNoticeInfo1/lhLeaseNoticeInfo1');
+    for (const [k, v] of Object.entries({ serviceKey: GOV, PG_SZ: '100', PAGE: String(page), PAN_SS: '공고중' })) u.searchParams.set(k, v);
+    const t = await get(u);
+    if (t.trim().startsWith('<')) throw new Error('LH: ' + (authErr(t) || t.slice(0, 120)));
+    const j = JSON.parse(t);
+    const box = (Array.isArray(j) ? j : [j]).find((x) => x && x.dsList) || {};
+    const rows = box.dsList || [];
+    if (!rows.length) break;
+    total = Number((rows[0] || {}).ALL_CNT) || rows.length;
+    all.push(...rows);
+  }
+  const seen = new Set();
+  return all.filter((x) => x.PAN_ID && !seen.has(x.PAN_ID) && seen.add(x.PAN_ID)).map((x) => ({ id: x.PAN_ID, title: x.PAN_NM || '', inst: x.CNP_CD_NM || x.AIS_TP_CD_NM || '', end: toIso(x.CLSG_DT), url: x.DTL_URL || x.DTL_URL_MOB || '', type: x.AIS_TP_CD_NM || '', upp: x.UPP_AIS_TP_NM || '', region: x.CNP_CD_NM || '', start: toIso(x.PAN_NT_ST_DT), state: x.PAN_SS || '' }));
+}
+
 // 🎁 정부24 공공서비스(보조금24) 전체 — 지원금 허브 (11/27) · 같은 공공데이터 키 · 1,000개씩
 async function gov24() {
   const all = [];
@@ -121,7 +141,7 @@ async function gov24() {
 }
 
 (async () => {
-  const jobs = [['alio', alio, GOV], ['gojobs', gojobs, GOV], ['cleaneye', cleaneye, GOV], ['w24', w24, W24], ['gov24', gov24, GOV]];
+  const jobs = [['alio', alio, GOV], ['gojobs', gojobs, GOV], ['cleaneye', cleaneye, GOV], ['w24', w24, W24], ['gov24', gov24, GOV], ['lh', lh, GOV]];
   let fail = 0;
   for (const [k, fn, key] of jobs) {
     if (!key) { console.log(`- ${k}: 키 없음 → 전에 받은 자료 그대로`); continue; }

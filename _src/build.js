@@ -151,7 +151,7 @@ const page = (title, body, { depth = 0, on = '', desc = '', noindex = false } = 
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)} | ${SITE}</title><meta name="description" content="${esc(desc || title)}">${noindex ? '<meta name="robots" content="noindex,follow">' : ''}<link rel="stylesheet" href="${up}site.css?v=${BUILD}"><link rel="icon" href="${up}favicon.svg" type="image/svg+xml"><meta property="og:site_name" content="${SITE}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc || title)}"><meta property="og:image" content="${SITE_URL}/og.png"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"></head><body>
 <header class="top"><div class="wrap"><a class="logo" href="${up}index.html">몽 <b>채용노트</b></a>
-<nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}guides.html" class="${on === 'guides' ? 'on' : ''}">가이드</a><a href="${up}pay-rank.html" class="${on === 'rank' ? 'on' : ''}">초임 순위</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">실수령 계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>
+<nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}lh.html" class="${on === 'lh' ? 'on' : ''}">LH 집 공고</a><a href="${up}guides.html" class="${on === 'guides' ? 'on' : ''}">가이드</a><a href="${up}pay-rank.html" class="${on === 'rank' ? 'on' : ''}">초임 순위</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">실수령 계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>
 <main class="wrap">${body}</main><script src="${up}site.js?v=${BUILD}"></script>
 <footer class="wrap">공고 정보는 잡알리오(공공기관 채용정보시스템) 자료예요. 지원 전에 꼭 원문 공고를 확인하세요. · <a href="${up}about.html" style="text-decoration:underline">소개</a> · <a href="${up}privacy.html" style="text-decoration:underline">개인정보처리방침</a> · ${today} 기준</footer></body></html>`;
 };
@@ -354,6 +354,9 @@ fs.writeFileSync(path.join(OUT, 'calc.html'), page('연봉 실수령액 계산�
 // 📘 가이드 글
 require('./guides.js')({ fs, path, OUT, page, esc, ROOT: __dirname });
 
+// 🏠 LH 집 공고
+require('./lh.js')({ fs, path, OUT, DATA, page, esc, dleft, md });
+
 // 🎁 지원금 허브
 require('./benefits.js')({ fs, path, OUT, DATA, page, esc, today, BUILD });
 
@@ -369,7 +372,7 @@ fs.writeFileSync(path.join(OUT, '404.html'), page('없는 쪽', `<h1>찾는 쪽�
 // 🔎 검색 엔진용 (sitemap = 검색에 보일 쪽만 · noindex 쪽은 뺌) · SITE_URL = 올릴 주소 (도메인 사면 바꿈)
 const BASE = (process.env.SITE_URL || 'https://mong122.github.io').replace(/\/$/, '');
 const indexable = [];
-for (const rel of ['index.html', 'jobs.html', 'about.html', 'calc.html', 'pay-rank.html', 'benefits.html', 'guides.html', ...(fs.existsSync(path.join(OUT, 'guide')) ? fs.readdirSync(path.join(OUT, 'guide')).map((f) => 'guide/' + f) : []), ...fs.readdirSync(path.join(OUT, 'job')).map((f) => 'job/' + f), ...fs.readdirSync(path.join(OUT, 'org')).map((f) => 'org/' + f)]) {
+for (const rel of ['index.html', 'jobs.html', 'about.html', 'calc.html', 'pay-rank.html', 'benefits.html', 'guides.html', 'lh.html', ...(fs.existsSync(path.join(OUT, 'guide')) ? fs.readdirSync(path.join(OUT, 'guide')).map((f) => 'guide/' + f) : []), ...fs.readdirSync(path.join(OUT, 'job')).map((f) => 'job/' + f), ...fs.readdirSync(path.join(OUT, 'org')).map((f) => 'org/' + f)]) {
   if (!fs.existsSync(path.join(OUT, rel))) continue;
   const h = fs.readFileSync(path.join(OUT, rel), 'utf8');
   if (!/name="robots" content="noindex/.test(h)) indexable.push(rel);
