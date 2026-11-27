@@ -1662,18 +1662,5 @@
   "budget": 3817,
   "url": "https://alio.go.kr/item/itemReportTerm.do?apbaId=C0054&reportFormRootNo=2060",
   "at": 1795704273075
- },
- "그랜드코리아레저(주)": {
-  "year": "2025년 결산",
-  "total": 4279,
-  "parts": [
-   "기본급 3,635만",
-   "실적수당 574만",
-   "급여성 복리후생비 70만"
-  ],
-  "budgetYear": "2026년 예산",
-  "budget": 4426,
-  "url": "https://alio.go.kr/item/itemReportTerm.do?apbaId=C0357&reportFormRootNo=2060",
-  "at": 1795738743222
  }
 }

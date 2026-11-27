@@ -42,6 +42,8 @@ jobs:
         run: |
           find . -mindepth 1 -maxdepth 1 ! -name .git ! -name _src ! -name .github -exec rm -rf {} +
           cp -r "$RUNNER_TEMP/out/." .
+          git checkout -- _src/data 2>/dev/null || true   # 깃허브가 받은 자료는 저장소에 안 쌓음 (지원금 10MB · 4시간마다) — 사이트 쪽만 올림
+          git clean -fdq _src/data || true
           git config user.name "mong-bot"
           git config user.email "mong-bot@users.noreply.github.com"
           git add -A
