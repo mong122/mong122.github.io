@@ -228,11 +228,11 @@ const regions = [...new Set(items.flatMap((x) => arr(x.region)))].sort();
 fs.writeFileSync(path.join(OUT, 'jobs.html'), page('공공기관 채용 전체 공고', `
 <h1>전체 공고</h1>
 <div class="srctabs"><button data-src="" class="on">전체 <small>${items.length}</small></button>${Object.entries(SRC).filter(([k]) => items.some((x) => x.src === k)).map(([k, v]) => `<button data-src="${k}">${v} <small>${items.filter((x) => x.src === k).length}</small></button>`).join('')}</div><p class="lead">공고 <b id="cnt">${items.length}</b>건</p>
-<div class="filters"><input id="fq" placeholder="기관·직무 찾기" style="flex:1 1 220px"><select id="fr"><option value="">모든 지역</option>${regions.map((r) => `<option>${esc(r)}</option>`).join('')}</select>
+<div class="filters" style="align-items:center"><select id="fr"><option value="">모든 지역</option>${regions.map((r) => `<option>${esc(r)}</option>`).join('')}</select>
 <select id="fk"><option value="">모든 고용 형태</option><option>정규직</option><option>무기계약직</option><option>비정규직</option><option>청년인턴</option></select>
 <select id="fs"><option value="">신입·경력 모두</option><option value="신입">신입 받는 곳</option></select>
-<select id="fe"><option value="">학력 모두</option><option value="학력무관">학력 무관</option><option value="고졸">고졸 가능</option></select></div>
-<div class="sorts"><button data-s="end" class="on">마감 임박순</button><button data-s="new">새로 올라온 순</button><button data-s="pay">초임 높은 순</button><button data-s="n">많이 뽑는 순</button><span class="reset" id="rs">조건 초기화</span></div>
+<select id="fe"><option value="">학력 모두</option><option value="학력무관">학력 무관</option><option value="고졸">고졸 가능</option></select><span id="rs" style="margin-left:auto;font-size:13px;color:var(--sub);text-decoration:underline;cursor:pointer;padding:0 6px">조건 초기화</span></div>
+<div class="filters" style="align-items:center;margin-top:0"><div class="sorts" style="margin:0"><button data-s="end" class="on">마감 임박순</button><button data-s="new">새로 올라온 순</button><button data-s="pay">초임 높은 순</button><button data-s="n">많이 뽑는 순</button></div><input id="fq" placeholder="기관·직무 찾기" style="flex:1 1 200px"></div>
 <div class="grid" id="list">${byEnd.map((x) => card(x).replace('<div class="card"', `<div class="card" data-src="${x.src}" data-r="${esc(arr(x.region).join(' '))}" data-k="${esc(kindGroup(x))}" data-s="${esc(x.se || '')}" data-e="${esc(x.acbg || '')}" data-end="${x.end}" data-new="${x.start || ''}" data-pay="${payOk(x) ? (entryBy[x.inst] || {}).total || 0 : 0}" data-n="${x.n || 0}" data-q="${esc((x.inst + ' ' + x.title + ' ' + (x.ncs || '')).toLowerCase())}"`)).join('')}</div>
 <p class="note" id="empty" hidden>맞는 공고가 없어요.</p>
 <script>
