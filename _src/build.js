@@ -232,9 +232,9 @@ fs.writeFileSync(path.join(OUT, 'jobs.html'), page('공공기관 채용 전체 �
 <select id="fk"><option value="">모든 고용 형태</option><option>정규직</option><option>무기계약직</option><option>비정규직</option><option>청년인턴</option></select>
 <select id="fs"><option value="">신입·경력 모두</option><option value="신입">신입 받는 곳</option></select>
 <select id="fe"><option value="">학력 모두</option><option value="학력무관">학력 무관</option><option value="고졸">고졸 가능</option></select></div>
-<div class="sorts"><button data-s="end" class="on">마감 임박순</button><button data-s="new">새로 올라온 순</button><button data-s="pay">초임 높은 순</button><button data-s="n">많이 뽑는 순</button><span class="reset" id="rs">거르기 처음으로</span></div>
+<div class="sorts"><button data-s="end" class="on">마감 임박순</button><button data-s="new">새로 올라온 순</button><button data-s="pay">초임 높은 순</button><button data-s="n">많이 뽑는 순</button><span class="reset" id="rs">조건 초기화</span></div>
 <div class="grid" id="list">${byEnd.map((x) => card(x).replace('<div class="card"', `<div class="card" data-src="${x.src}" data-r="${esc(arr(x.region).join(' '))}" data-k="${esc(kindGroup(x))}" data-s="${esc(x.se || '')}" data-e="${esc(x.acbg || '')}" data-end="${x.end}" data-new="${x.start || ''}" data-pay="${payOk(x) ? (entryBy[x.inst] || {}).total || 0 : 0}" data-n="${x.n || 0}" data-q="${esc((x.inst + ' ' + x.title + ' ' + (x.ncs || '')).toLowerCase())}"`)).join('')}</div>
-<p class="note" id="empty" hidden>맞는 공고가 없어요. 거르기를 줄여 보세요.</p>
+<p class="note" id="empty" hidden>맞는 공고가 없어요. 조건을 줄이거나 초기화해 보세요.</p>
 <script>
 const L=document.getElementById('list'),cards=[...L.children];
 let SRCF='';document.querySelectorAll('.srctabs button').forEach(b=>b.onclick=()=>{SRCF=b.dataset.src;document.querySelectorAll('.srctabs button').forEach(x=>x.classList.toggle('on',x===b));f();});
