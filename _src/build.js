@@ -138,6 +138,7 @@ details.orig{margin:26px 0 0}details.orig summary{cursor:pointer;font-size:19px;
 .result{margin-top:16px}.result .big{background:linear-gradient(135deg,#1f4fd1,#3b6cf0);color:#fff;border-radius:16px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}.result .big b{font-size:26px}
 .keynote{background:var(--accent-soft);border-radius:16px;padding:16px 18px;margin:14px 0}.keynote>b{display:block;margin-bottom:8px}.keynote div{margin:5px 0;font-size:15px}.keynote span{display:inline-block;min-width:74px;font-weight:700;color:var(--accent)}.keynote .note{margin:8px 0 0}@media(max-width:600px){.keynote span{display:block;min-width:0;font-size:13px}}
 .srctabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:6px 0 14px;overflow-x:auto;scrollbar-width:none}.srctabs button{flex:none;font:inherit;font-size:15px;font-weight:700;color:var(--sub);background:none;border:0;padding:10px 14px;margin-bottom:-2px;border-bottom:3px solid transparent;cursor:pointer}.srctabs button.on{color:var(--accent);border-bottom-color:var(--accent)}.srctabs small{color:#9aa3b1;font-weight:600}
+article.guide{font-size:16.5px;line-height:1.8}article.guide h2{margin-top:30px}article.guide h3{font-size:17px;margin:20px 0 6px}article.guide p{margin:10px 0}.glist{padding-left:22px;margin:8px 0}.glist li{margin:4px 0}
 .note{font-size:13px;color:var(--sub);margin-top:10px}
 .ad{border:1px dashed #c8ced8;border-radius:12px;color:#9aa3b1;font-size:13px;text-align:center;padding:22px;margin:22px 0;background:#fbfbfc}
 footer{margin:50px 0 30px;font-size:13px;color:var(--sub);border-top:1px solid var(--line);padding-top:18px}
@@ -149,7 +150,7 @@ const page = (title, body, { depth = 0, on = '', desc = '', noindex = false } = 
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)} | ${SITE}</title><meta name="description" content="${esc(desc || title)}">${noindex ? '<meta name="robots" content="noindex,follow">' : ''}<link rel="stylesheet" href="${up}site.css?v=${BUILD}"></head><body>
 <header class="top"><div class="wrap"><a class="logo" href="${up}index.html">몽 <b>채용노트</b></a>
-<nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}pay-rank.html" class="${on === 'rank' ? 'on' : ''}">초임 순위</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">실수령 계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>
+<nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}guides.html" class="${on === 'guides' ? 'on' : ''}">가이드</a><a href="${up}pay-rank.html" class="${on === 'rank' ? 'on' : ''}">초임 순위</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">실수령 계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>
 <main class="wrap">${body}</main><script src="${up}site.js?v=${BUILD}"></script>
 <footer class="wrap">공고 정보는 잡알리오(공공기관 채용정보시스템) 자료예요. 지원 전에 꼭 원문 공고를 확인하세요. · <a href="${up}about.html" style="text-decoration:underline">소개</a> · <a href="${up}privacy.html" style="text-decoration:underline">개인정보처리방침</a> · ${today} 기준</footer></body></html>`;
 };
@@ -179,6 +180,9 @@ const card = (x, up = '') => {
 };
 
 // ── 쪽 만들기 ──
+// 🗄 마감 공고 보관 (11/27): 전에 만든 archive.json 을 지우기 전에 읽어 둠 → 마감돼도 60일 동안 "마감된 공고" 쪽을 남김 (검색에서 온 사람이 없는 쪽을 안 만나게)
+const ARCH_PREV = [path.join(OUT, 'archive.json'), path.join(__dirname, '..', 'archive.json'), path.join(DATA, 'archive.json')].find((f) => fs.existsSync(f));
+const archive = ARCH_PREV ? (() => { try { return JSON.parse(fs.readFileSync(ARCH_PREV, 'utf8')); } catch (e) { return {}; } })() : {};
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'job'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'org'), { recursive: true });
@@ -282,6 +286,27 @@ ${sec('전형 절차', x.screen)}
 ${others.length ? `<h2>${esc(x.inst)}의 다른 공고</h2><div class="grid">${others.slice(0, 6).map((y) => card(y, '../')).join('')}</div>` : ''}`, { depth: 1, noindex: !((b && b.url) || NOTES[x.id]), desc: `${x.inst} ${kindOf(x)} ${x.n ? x.n + '명' : ''} 채용, ${md(x.end)} 마감. 지원 자격·전형 절차·초봉 정리.` }));
 }
 
+// 🗄 마감된 공고 쪽 (60일)
+{
+  const now = new Set(items.map((x) => String(x.id)));
+  for (const x of items) archive[x.id] = { inst: x.inst, title: titleShort(x), end: x.end, src: x.src, url: x.src === 'alio' ? pcUrl(x.id) : x.url || '' };
+  let kept = 0;
+  for (const [id, a] of Object.entries(archive)) {
+    if (now.has(id)) continue;
+    if (!a.end || dleft(a.end) < -60) { delete archive[id]; continue; }
+    const same = (orgs[a.inst] || []).slice(0, 6);
+    fs.writeFileSync(path.join(OUT, 'job', id + '.html'), page(`${a.inst} 채용 (마감)`, `
+<div class="crumb"><a href="../index.html">처음</a> › <a href="../jobs.html">전체 공고</a> › ${esc(a.inst)}</div>
+<h1>${esc(a.title)}</h1><p class="lead">${esc(a.inst)} · <b style="color:var(--warn)">${md(a.end)} 마감된 공고예요</b></p>
+<div class="keynote" style="background:#fff1ee"><b>이 공고는 접수가 끝났어요</b><div>같은 기관의 지금 받는 공고나 비슷한 공고를 아래에서 보세요.</div></div>
+${same.length ? `<h2>${esc(a.inst)}에서 지금 받는 공고</h2><div class="grid">${same.map((y) => card(y, '../')).join('')}</div>` : ''}
+<p class="btns"><a class="btn p" href="../jobs.html">지금 받는 공고 전체 보기</a>${a.url ? `<a class="btn" href="${esc(a.url)}" rel="nofollow noreferrer" target="_blank">원문 공고 (보관)</a>` : ''}</p>`, { depth: 1, noindex: true, desc: `${a.inst} 채용 공고 (마감)` }));
+    kept++;
+  }
+  fs.writeFileSync(path.join(OUT, 'archive.json'), JSON.stringify(archive));
+  console.log(`  🗄 마감된 공고 쪽 ${kept} (60일 보관)`);
+}
+
 // 기관 쪽 (11/27: 초임 내역 표 + 공공기관 초임 순위 몇 위 — 우리가 계산한 값)
 const payRank = Object.entries(entryBy).filter(([k, v]) => v && v.total && (orgs[k] || []).length).sort((p, q) => q[1].total - p[1].total);
 const rankOf = (inst) => { const i = payRank.findIndex(([k]) => k === inst); return i < 0 ? null : i + 1; };
@@ -324,6 +349,9 @@ const TAX = fs.existsSync(TAX_F) ? JSON.parse(fs.readFileSync(TAX_F, 'utf8')) : 
 fs.copyFileSync(path.join(__dirname, 'assets', 'calc.js'), path.join(OUT, 'calc.js'));
 fs.writeFileSync(path.join(OUT, 'calc.html'), page('연봉 실수령액 계산기 (2026)', fs.readFileSync(path.join(__dirname, 'assets', 'calc-body.html'), 'utf8') + '<script>window.TAX=' + JSON.stringify(TAX) + ';</script><script src="calc.js?v=' + BUILD + '"></script>', { on: 'calc', noindex: !TAX, desc: '2026년 연봉 실수령액 계산기 — 4대 보험·소득세를 빼고 한 달에 받는 돈' }));
 
+// 📘 가이드 글
+require('./guides.js')({ fs, path, OUT, page, esc, ROOT: __dirname });
+
 // 🎁 지원금 허브
 require('./benefits.js')({ fs, path, OUT, DATA, page, esc, today, BUILD });
 
@@ -339,7 +367,7 @@ fs.writeFileSync(path.join(OUT, '404.html'), page('없는 쪽', `<h1>찾는 쪽�
 // 🔎 검색 엔진용 (sitemap = 검색에 보일 쪽만 · noindex 쪽은 뺌) · SITE_URL = 올릴 주소 (도메인 사면 바꿈)
 const BASE = (process.env.SITE_URL || 'https://mong122.github.io').replace(/\/$/, '');
 const indexable = [];
-for (const rel of ['index.html', 'jobs.html', 'about.html', 'calc.html', 'pay-rank.html', 'benefits.html', ...fs.readdirSync(path.join(OUT, 'job')).map((f) => 'job/' + f), ...fs.readdirSync(path.join(OUT, 'org')).map((f) => 'org/' + f)]) {
+for (const rel of ['index.html', 'jobs.html', 'about.html', 'calc.html', 'pay-rank.html', 'benefits.html', 'guides.html', ...(fs.existsSync(path.join(OUT, 'guide')) ? fs.readdirSync(path.join(OUT, 'guide')).map((f) => 'guide/' + f) : []), ...fs.readdirSync(path.join(OUT, 'job')).map((f) => 'job/' + f), ...fs.readdirSync(path.join(OUT, 'org')).map((f) => 'org/' + f)]) {
   if (!fs.existsSync(path.join(OUT, rel))) continue;
   const h = fs.readFileSync(path.join(OUT, rel), 'utf8');
   if (!/name="robots" content="noindex/.test(h)) indexable.push(rel);
