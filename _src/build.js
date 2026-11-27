@@ -156,7 +156,7 @@ const page = (title, body, { depth = 0, on = '', desc = '', noindex = false } = 
 <header class="top"><div class="wrap"><a class="logo" href="${up}index.html">몽 <b>채용노트</b></a>
 <nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}lh.html" class="${on === 'lh' ? 'on' : ''}">LH 집 공고</a>${fs.existsSync(path.join(DATA, 'pool-rates.json')) ? `<a href="${up}rates.html" class="${on === 'rates' ? 'on' : ''}">예적금 금리</a>` : ''}<a href="${up}guides.html" class="${on === 'guides' ? 'on' : ''}">가이드</a><a href="${up}orgs.html" class="${on === 'orgs' ? 'on' : ''}">기관 정보</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">실수령 계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>
 <main class="wrap">${body}</main><script src="${up}site.js?v=${BUILD}"></script>
-<footer class="wrap">공고 정보는 잡알리오(공공기관 채용정보시스템) 자료예요. 지원 전에 꼭 원문 공고를 확인하세요. · <a href="${up}about.html" style="text-decoration:underline">소개</a> · <a href="${up}privacy.html" style="text-decoration:underline">개인정보처리방침</a> · ${today} 기준</footer></body></html>`;
+<footer class="wrap">공공 자료를 모아 정리했습니다. 지원·신청 전 원문을 확인해 주세요. · <a href="${up}about.html" style="text-decoration:underline">소개</a> · <a href="${up}privacy.html" style="text-decoration:underline">개인정보처리방침</a> · ${today} 기준</footer></body></html>`;
 };
 const regionShort = (x) => { const r = arr(x.region); return r.length > 1 ? `${r[0]} 외 ${r.length - 1}곳` : r[0] || (x.src === 'w24' ? '' : '지역 미정'); };
 const titleShort = (x) => { let t = titleClean(x.title).replace(/^㈜\s*/, '').replace(/^\(주\)\s*/, ''); for (const k of [x.inst, x.inst.replace(/\(주\)|\(재\)/g, '').trim()]) if (k && t.startsWith(k)) { t = t.slice(k.length).replace(/^(\s|\(주\))+/, ''); break; } return t || titleClean(x.title); };
@@ -393,12 +393,16 @@ require('./lh.js')({ fs, path, OUT, DATA, page, esc, dleft, md });
 require('./benefits.js')({ fs, path, OUT, DATA, page, esc, today, BUILD });
 
 // 소개 (11/27 — 하루 조사: 운영자 배경·출처를 밝히는 쪽 = 신뢰 신호)
-fs.writeFileSync(path.join(OUT, 'about.html'), page('소개', `<h1>몽 채용노트는</h1><div class="box" style="white-space:normal">
-<p>공공기관 채용 공고를 매일 모아 <b>마감 순·고용 형태·초봉</b>으로 한눈에 볼 수 있게 정리하는 곳이에요.</p>
-<p><b>어디서 가져오나</b> — 공고는 잡알리오(공공기관 채용정보시스템), 신입 초임은 알리오 경영공시에서 가져와요. 매일 새로 받아 마감 지난 공고는 내려요.</p>
-<p><b>몽 채용노트 정리</b> — 네이버 블로그 "MONG 생활노트"에서 공고문을 하나하나 읽고 일정·자격·전형을 정리한 공고는 그 정리를 함께 보여 드려요.</p>
-<p><b>꼭 확인하세요</b> — 공고는 바뀔 수 있어요. 지원 전에 각 쪽의 "공고문 원문" 단추로 원문을 확인해 주세요.</p>
-<p><b>블로그</b> — <a href="https://blog.naver.com/eleode123" style="text-decoration:underline">MONG 생활노트</a></p></div>`, { desc: '공공기관 채용 공고를 매일 모아 마감 순으로 정리하는 몽 채용노트 소개' }));
+fs.writeFileSync(path.join(OUT, 'about.html'), page('소개', `<h1>몽 채용노트 소개</h1><div class="box" style="white-space:normal">
+<p>몽 채용노트는 공공기관 채용과 정부 지원 정보를 한곳에서 볼 수 있도록 정리한 사이트입니다.</p>
+<p><b>제공 정보</b></p>
+<ul style="margin:0 0 12px;padding-left:20px"><li>채용 공고 (공공기관 · 공무원 · 공무직 · 지방 공기업 · 대기업)</li><li>정부 지원금</li><li>LH 임대·분양 공고</li><li>지원금·제도 가이드</li><li>기관별 채용 정보</li><li>연봉 실수령액 계산기</li></ul>
+<p><b>정보 출처</b></p>
+<p>잡알리오, 알리오, 나라일터, 고용24, 정부24, LH, 금융감독원, 국세청</p>
+<p><b>유의 사항</b></p>
+<p>공고와 지원 내용은 바뀔 수 있습니다. 지원·신청 전 원문을 꼭 확인해 주세요.</p>
+<p><b>문의</b></p>
+<p><a href="mailto:eleode122@gmail.com" style="text-decoration:underline">eleode122@gmail.com</a></p></div>`, { desc: '공공기관 채용과 정부 지원 정보를 한곳에서 볼 수 있도록 정리한 몽 채용노트 소개' }));
 fs.writeFileSync(path.join(OUT, '404.html'), page('없는 쪽', `<h1>찾는 쪽이 없어요</h1><p class="lead">마감이 지나 내려간 공고일 수 있어요.</p><p><a class="btn p" href="/index.html">이번 주 마감 공고 보기</a></p>`, { noindex: true }));
 
 // 🔎 검색 엔진용 (sitemap = 검색에 보일 쪽만 · noindex 쪽은 뺌) · SITE_URL = 올릴 주소 (도메인 사면 바꿈)
