@@ -10,7 +10,7 @@ const DATA = process.env.SITE_DATA || path.join(__dirname, 'data');
 const OUT = process.env.SITE_OUT || path.join(__dirname, 'out');
 let BUILD = Date.now().toString(36); // ↓ 아래 CSS 를 만든 뒤 CSS 내용으로 다시 정함 (11/27: 시각으로 하면 4시간마다 모든 쪽이 바뀐 것으로 올라가 저장소가 무거워짐) // CSS 새 판을 바로 받게 (11/27: 깃허브가 CSS 를 10분 묶어 둬 새 쪽 + 옛 모양이 섞여 보임)
 const SITE_URL = (process.env.SITE_URL || 'https://mongnote.com').replace(/\/$/, ''); // 도메인 사면 SITE_URL 만 바꿈
-const SITE = '몽 채용노트'; // 가칭 — 이름은 사장님이 정함
+const SITE = 'mongnote'; // 11/28 사장님 정함 (전 '몽 채용노트' — 지원금·부동산도 들어가서)
 
 const rd = (f) => { try { return JSON.parse(fs.readFileSync(path.join(DATA, f), 'utf8')); } catch (e) { return null; } };
 const st = {};
@@ -153,7 +153,7 @@ const page = (title, body, { depth = 0, on = '', desc = '', noindex = false } = 
   const up = '../'.repeat(depth);
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)} | ${SITE}</title><meta name="description" content="${esc(desc || title)}"><meta name="naver-site-verification" content="df52554a05ebd239836020e9067fc5e6100e513e">${noindex ? '<meta name="robots" content="noindex,follow">' : ''}<link rel="stylesheet" href="${up}site.css?v=${BUILD}"><link rel="icon" href="${up}favicon.svg" type="image/svg+xml"><meta property="og:site_name" content="${SITE}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc || title)}"><meta property="og:image" content="${SITE_URL}/og.png"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"></head><body>
-<header class="top"><div class="wrap"><a class="logo" href="${up}index.html">몽 <b>채용노트</b></a>
+<header class="top"><div class="wrap"><a class="logo" href="${up}index.html">mong<b>note</b></a>
 <nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}lh.html" class="${on === 'lh' ? 'on' : ''}">LH 집 공고</a>${fs.existsSync(path.join(DATA, 'pool-rates.json')) ? `<a href="${up}rates.html" class="${on === 'rates' ? 'on' : ''}">예적금 금리</a>` : ''}<a href="${up}guides.html" class="${on === 'guides' ? 'on' : ''}">가이드</a><a href="${up}orgs.html" class="${on === 'orgs' ? 'on' : ''}">기관 정보</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">실수령 계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>
 <main class="wrap">${body}</main><script src="${up}site.js?v=${BUILD}"></script>
 <footer class="wrap">공공 자료를 모아 정리했습니다. 지원·신청 전 원문을 확인해 주세요. · <a href="${up}about.html" style="text-decoration:underline">소개</a> · <a href="${up}privacy.html" style="text-decoration:underline">개인정보처리방침</a> · ${today} 기준</footer></body></html>`;
@@ -333,7 +333,7 @@ ${list.length ? `<p class="btns"><a class="btn p" href="#now">지금 받는 공�
 ${w ? `<article class="guide">${w.html}</article><p class="note">${esc(w.date || '')} · 전형·과목은 공고마다 바뀔 수 있어요.</p>` : ''}
 ${payBox}
 <h2 id="now">지금 받는 공고</h2>${list.length ? `<div class="grid">${list.sort((p, q) => p.end.localeCompare(q.end)).map((y) => card(y, '../').replace(/<a class="c c-more"[^>]*>[^<]*<\/a>/, '')).join('')}</div>` : `<p class="note">지금 받는 공고가 없어요.</p>`}
-${past.length ? `<h2>몽 채용노트 정리 글</h2><div class="box" style="white-space:normal">${past.map((j) => `<div>· <a href="${esc(j.published.url)}" style="text-decoration:underline" rel="noreferrer" target="_blank">${esc(j.published.title)}</a></div>`).join('')}</div>` : ''}
+${past.length ? `<h2>${SITE} 정리 글</h2><div class="box" style="white-space:normal">${past.map((j) => `<div>· <a href="${esc(j.published.url)}" style="text-decoration:underline" rel="noreferrer" target="_blank">${esc(j.published.title)}</a></div>`).join('')}</div>` : ''}
 ${w && w.sources.length ? `<h2>출처</h2><div class="box" style="white-space:normal">${w.sources.map((u) => `<div>· <a href="${esc(u)}" rel="nofollow noreferrer" target="_blank" style="text-decoration:underline">${esc(u.replace(/^https?:\/\//, '').slice(0, 70))}</a></div>`).join('')}</div>` : ''}
 <p class="btns"><a class="btn" href="../orgs.html">다른 기관 보기</a><a class="btn" href="../pay-rank.html">초임 순위</a>${e ? `<a class="btn" href="../calc.html?y=${e.total}">이 초임 실수령 계산</a>` : ''}</p>`, { depth: 1, noindex: !(w || past.length), desc: w ? w.desc : `${inst} 채용 공고 ${list.length}건 · 신입 초임 정리` }));
 }
@@ -397,8 +397,8 @@ require('./lh.js')({ fs, path, OUT, DATA, page, esc, dleft, md });
 require('./benefits.js')({ fs, path, OUT, DATA, page, esc, today, BUILD });
 
 // 소개 (11/27 — 하루 조사: 운영자 배경·출처를 밝히는 쪽 = 신뢰 신호)
-fs.writeFileSync(path.join(OUT, 'about.html'), page('소개', `<h1>몽 채용노트 소개</h1><div class="box" style="white-space:normal">
-<p>몽 채용노트는 공공기관 채용과 정부 지원 정보를 한곳에서 볼 수 있도록 정리한 사이트입니다.</p>
+fs.writeFileSync(path.join(OUT, 'about.html'), page('소개', `<h1>${SITE} 소개</h1><div class="box" style="white-space:normal">
+<p>${SITE}는 공공기관 채용과 정부 지원 정보를 한곳에서 볼 수 있도록 정리한 사이트입니다.</p>
 <p><b>제공 정보</b></p>
 <ul style="margin:0 0 12px;padding-left:20px"><li>채용 공고 (공공기관 · 공무원 · 공무직 · 지방 공기업 · 대기업)</li><li>정부 지원금</li><li>LH 임대·분양 공고</li><li>지원금·제도 가이드</li><li>기관별 채용 정보</li><li>연봉 실수령액 계산기</li></ul>
 <p><b>정보 출처</b></p>
@@ -406,7 +406,7 @@ fs.writeFileSync(path.join(OUT, 'about.html'), page('소개', `<h1>몽 채용노
 <p><b>유의 사항</b></p>
 <p>공고와 지원 내용은 바뀔 수 있습니다. 지원·신청 전 원문을 꼭 확인해 주세요.</p>
 <p><b>문의</b></p>
-<p><a href="mailto:eleode122@gmail.com" style="text-decoration:underline">eleode122@gmail.com</a></p></div>`, { desc: '공공기관 채용과 정부 지원 정보를 한곳에서 볼 수 있도록 정리한 몽 채용노트 소개' }));
+<p><a href="mailto:eleode122@gmail.com" style="text-decoration:underline">eleode122@gmail.com</a></p></div>`, { desc: `공공기관 채용과 정부 지원 정보를 한곳에서 볼 수 있도록 정리한 ${SITE} 소개` }));
 fs.writeFileSync(path.join(OUT, '404.html'), page('없는 쪽', `<h1>찾는 쪽이 없어요</h1><p class="lead">마감이 지나 내려간 공고일 수 있어요.</p><p><a class="btn p" href="/index.html">이번 주 마감 공고 보기</a></p>`, { noindex: true }));
 
 // 🔎 검색 엔진용 (sitemap = 검색에 보일 쪽만 · noindex 쪽은 뺌) · SITE_URL = 올릴 주소 (도메인 사면 바꿈)
