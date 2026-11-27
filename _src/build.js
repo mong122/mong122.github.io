@@ -69,7 +69,7 @@ function ours(draft) {
   const out = [];
   for (const line of draft.split('\n')) {
     const box = line.match(/^\[상자\s*:\s*(.+)\]\s*$/);
-    if (box) { const [h, ...rest] = box[1].split(' / '); out.push(`<div class="box" style="white-space:normal;margin:10px 0"><b>${esc(unmark(h).replace(/^[^\p{L}\p{N}]+/u, '').replace(/MONG N줄 요약|MONG \d+줄 요약/, '한눈에 요약'))}</b>${rest.map((r) => `<div>· ${esc(unmark(r).replace(/^✔\s*/, ''))}</div>`).join('')}</div>`); continue; }
+    if (box) { const [h, ...rest] = box[1].split(' / '); out.push(`<div class="box" style="white-space:normal;margin:10px 0"><b>${esc(unmark(h).replace(/^[^\p{L}\p{N}]+/u, '').replace(/MONG N줄 요약|MONG \d+줄 요약/, '한눈에 요약').replace(/놓치면 끝나는 것|놓치면 안 되는 것/, '지원 전 꼭 확인'))}</b>${rest.map((r) => `<div>· ${esc(unmark(r).replace(/^✔\s*/, ''))}</div>`).join('')}</div>`); continue; }
     const tb = line.match(/^\[표\s*:\s*(.+)\]\s*$/);
     if (tb) {
       const rows = tb[1].split(' / ').map((r) => r.split(' | ').map(unmark)).filter((r) => !/^남은 날/.test(r[0]) && r.slice(1).some((c) => c && c !== '-'));
