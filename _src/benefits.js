@@ -40,7 +40,7 @@ ${box('누가 받나요', x.who)}${box('무엇을 받나요', x.what)}
   fs.writeFileSync(path.join(OUT, 'benefits.html'), page('정부 지원금 찾기', `
 <section class="hero" style="background:linear-gradient(135deg,#0f7b4b,#22a06b)"><h1>정부 지원금, 많이 찾는 것부터</h1><p>정부24 보조금24에 올라온 지원금 가운데 사람들이 많이 찾아본 ${top.length.toLocaleString('ko-KR')}개를 모았어요. 분야·대상으로 고르고 이름으로 찾아보세요.</p>
 <form class="herosearch" onsubmit="event.preventDefault();bq.value=this.q.value;go()"><input name="q" placeholder="지원금 이름이나 낱말로 찾기"><button>찾기</button></form></section>
-<h2>숨은 돈 찾기 바로가기</h2><p class="lead">이름만 넣으면 조회되는 공식 누리집이에요. 몰라서 안 찾아간 돈이 있는지 한 번씩 확인해 보세요.</p>
+<h2 id="hidden">숨은 돈 찾기 바로가기</h2><p class="lead">이름만 넣으면 조회되는 공식 누리집이에요. 몰라서 안 찾아간 돈이 있는지 한 번씩 확인해 보세요.</p>
 <div class="grid">${HIDDEN.map(([t, d, u, s]) => `<a class="card" href="${u}" rel="nofollow noreferrer" target="_blank"><span class="org-name">${t}</span><span class="sub">${d}</span><span class="foot"><span class="open">${s}</span><span class="go">바로가기 →</span></span></a>`).join('')}</div>
 <h2>지원금 찾기</h2>
 <div class="srctabs" id="ftabs"><button data-f="" class="on">전체</button>${fields.map((x) => `<button data-f="${esc(x)}">${esc(x)}</button>`).join('')}</div>
@@ -49,7 +49,7 @@ ${box('누가 받나요', x.who)}${box('무엇을 받나요', x.what)}
 <p class="note">정부24(보조금24) 공개 자료를 깃허브가 4시간마다 새로 받아요 (${today} 기준). 금액·기한은 바뀔 수 있으니 신청 전 정부24에서 꼭 확인하세요.</p>
 <script>(async()=>{const D=await (await fetch('benefits-data.json?v=${BUILD}')).json();let F='',N=30,L=[];const V=n=>n>=1e4?Math.round(n/1e4).toLocaleString('ko-KR')+'만':n.toLocaleString('ko-KR');
 const e=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const card=x=>'<a class="card" href="'+(x[9]?'benefit/'+x[0]+'.html':e(x[10]))+'"'+(x[9]?'':' target="_blank" rel="nofollow noreferrer"')+'><span class="org-name">'+e(x[1])+'</span><span class="sub">'+e(x[2])+'</span><span class="chips"><span class="c c-kind">'+e(x[4])+'</span><span class="c c-se">'+e(x[6])+'</span><span class="c">'+e(x[5])+'</span></span><span class="when"><span>'+e(x[3])+'</span><b style="font-size:13px;color:var(--sub)">조회 '+V(x[7])+'</b></span><span class="foot"><span class="open">'+e((x[8]||'').slice(0,24)||'기한 확인')+'</span><span class="go">자세히 →</span></span></a>';
+const card=x=>'<a class="card" href="'+(x[9]?'benefit/'+x[0]+'.html':e(x[10]))+'"'+(x[9]?'':' target="_blank" rel="nofollow noreferrer"')+'><span class="org-name">'+e(x[1])+'</span><span class="sub">'+e(x[2])+'</span><span class="chips"><span class="c c-kind">'+e(x[4])+'</span><span class="c c-se">'+e(x[6])+'</span><span class="c">'+e(x[5])+'</span></span><span class="when"><span>'+e(x[3])+'</span><b style="font-size:13px;color:var(--sub)">조회 '+V(x[7])+'</b></span><span class="foot"><span class="open">'+e((x[8]||'').replace(/[○□ㅇ※]/g,' ').replace(/s+/g,' ').trim().slice(0,22)||'기한 확인')+'</span><span class="go">자세히 →</span></span></a>';
 window.go=()=>{const q=bq.value.trim().toLowerCase(),u=bu.value,t=bt.value;L=D.filter(x=>(!F||x[4]===F)&&(!u||x[6].includes(u))&&(!t||x[5]===t)&&(!q||(x[1]+' '+x[2]+' '+x[3]).toLowerCase().includes(q)));N=30;draw()};
 const draw=()=>{blist.innerHTML=L.slice(0,N).map(card).join('');bcnt.textContent='맞는 지원금 '+L.length.toLocaleString('ko-KR')+'개 · 많이 찾는 순';bmore.hidden=N>=L.length};
 bmore.onclick=()=>{N+=30;draw()};document.querySelectorAll('#ftabs button').forEach(b=>b.onclick=()=>{F=b.dataset.f;document.querySelectorAll('#ftabs button').forEach(x=>x.classList.toggle('on',x===b));go()});
