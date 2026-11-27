@@ -9,6 +9,7 @@ const path = require('path');
 const DATA = process.env.SITE_DATA || path.join(__dirname, 'data');
 const OUT = process.env.SITE_OUT || path.join(__dirname, 'out');
 let BUILD = Date.now().toString(36); // ↓ 아래 CSS 를 만든 뒤 CSS 내용으로 다시 정함 (11/27: 시각으로 하면 4시간마다 모든 쪽이 바뀐 것으로 올라가 저장소가 무거워짐) // CSS 새 판을 바로 받게 (11/27: 깃허브가 CSS 를 10분 묶어 둬 새 쪽 + 옛 모양이 섞여 보임)
+const SITE_URL = (process.env.SITE_URL || 'https://mong122.github.io').replace(/\/$/, ''); // 도메인 사면 SITE_URL 만 바꿈
 const SITE = '몽 채용노트'; // 가칭 — 이름은 사장님이 정함
 
 const rd = (f) => { try { return JSON.parse(fs.readFileSync(path.join(DATA, f), 'utf8')); } catch (e) { return null; } };
@@ -148,7 +149,7 @@ footer{margin:50px 0 30px;font-size:13px;color:var(--sub);border-top:1px solid v
 const page = (title, body, { depth = 0, on = '', desc = '', noindex = false } = {}) => {
   const up = '../'.repeat(depth);
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(title)} | ${SITE}</title><meta name="description" content="${esc(desc || title)}">${noindex ? '<meta name="robots" content="noindex,follow">' : ''}<link rel="stylesheet" href="${up}site.css?v=${BUILD}"></head><body>
+<title>${esc(title)} | ${SITE}</title><meta name="description" content="${esc(desc || title)}">${noindex ? '<meta name="robots" content="noindex,follow">' : ''}<link rel="stylesheet" href="${up}site.css?v=${BUILD}"><link rel="icon" href="${up}favicon.svg" type="image/svg+xml"><meta property="og:site_name" content="${SITE}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc || title)}"><meta property="og:image" content="${SITE_URL}/og.png"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"></head><body>
 <header class="top"><div class="wrap"><a class="logo" href="${up}index.html">몽 <b>채용노트</b></a>
 <nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}guides.html" class="${on === 'guides' ? 'on' : ''}">가이드</a><a href="${up}pay-rank.html" class="${on === 'rank' ? 'on' : ''}">초임 순위</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">실수령 계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>
 <main class="wrap">${body}</main><script src="${up}site.js?v=${BUILD}"></script>
@@ -188,6 +189,7 @@ fs.mkdirSync(path.join(OUT, 'job'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'org'), { recursive: true });
 BUILD = require('crypto').createHash('sha1').update(CSS + 'js3').digest('hex').slice(0, 8); // CSS·site.js 가 바뀔 때만 바뀜 (site.js 고치면 'js3' 숫자 올리기)
 fs.writeFileSync(path.join(OUT, 'site.css'), CSS);
+for (const f of ['favicon.svg', 'og.png']) if (fs.existsSync(path.join(__dirname, 'assets', f))) fs.copyFileSync(path.join(__dirname, 'assets', f), path.join(OUT, f)); // 🖼 탭 아이콘 · 공유 미리보기 그림
 // ⭐ 찜하기 (11/27 제미나이 2 "출퇴근길에 폰으로 훑고 나중에 지원") — 이 기기 localStorage 만, 서버·로그인 없음
 fs.writeFileSync(path.join(OUT, 'site.js'), `(()=>{const K='mongSaved';const get=()=>{try{return JSON.parse(localStorage.getItem(K)||'{}')}catch(e){return {}}};const put=v=>localStorage.setItem(K,JSON.stringify(v));
 const base=(document.querySelector('link[rel=stylesheet]').getAttribute('href')||'').replace(/site\.css.*$/,'');
