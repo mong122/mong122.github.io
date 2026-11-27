@@ -1,10 +1,7 @@
 // 📘 가이드 글 (11/27 — 애드센스 "직접 쓴 쓸모 있는 글" 칸) · build.js 가 부름
 //   글 = site/guides/<주소>.md (맨 위 --- 사이 title·desc·cat·date·sources, 아래 본문) → guide/<주소>.html + guides.html (목록) · 검색에 보임
 //   본문 표기 (작은 마크다운): ## 소제목 · ### 작은 제목 · - 목록 · 1. 번호 목록 · | 표 | · **굵게** · [글자](주소) · > 알림 상자 · 빈 줄 = 문단
-module.exports = function guides({ fs, path, OUT, page, esc, ROOT }) {
-  const dir = path.join(ROOT, 'guides');
-  if (!fs.existsSync(dir)) return [];
-  const list = [];
+function makeMd(esc) {
   const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|\.{0,2}\/?[\w\-./]+\.html)\)/g, (m, t, u) => `<a href="${u}" style="text-decoration:underline"${/^https?:/.test(u) ? ' rel="nofollow noreferrer" target="_blank"' : ''}>${t}</a>`);
   const md = (src) => {
     const out = [];
@@ -28,6 +25,13 @@ module.exports = function guides({ fs, path, OUT, page, esc, ROOT }) {
     }
     return out.join('\n');
   };
+  return { md, inline };
+}
+module.exports = function guides({ fs, path, OUT, page, esc, ROOT }) {
+  const dir = path.join(ROOT, 'guides');
+  if (!fs.existsSync(dir)) return [];
+  const list = [];
+  const { md } = makeMd(esc);
   fs.mkdirSync(path.join(OUT, 'guide'), { recursive: true });
   for (const f of fs.readdirSync(dir).filter((x) => /\.md$/.test(x)).sort()) {
     const raw = fs.readFileSync(path.join(dir, f), 'utf8');
@@ -53,3 +57,4 @@ ${list.length ? cats.map((c) => `<h2>${esc(c)}</h2><div class="grid">${list.filt
   console.log(`  📘 가이드: ${list.length}편`);
   return list;
 };
+module.exports.makeMd = makeMd; // 🏢 기관 정보 글도 같은 표기
