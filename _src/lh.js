@@ -15,14 +15,14 @@ module.exports = function lh({ fs, path, OUT, DATA, page, esc, dleft, md }) {
 <span class="chips"><span class="c c-kind">${esc(x.type || x.upp)}</span><span class="c c-rg">${esc(short(x.region))}</span></span>
 <span class="when"><span>${x.start ? md(x.start) + ' 공고' : ''} · ${md(x.end)} 마감</span><b class="dday ${dleft(x.end) <= 3 ? 'soon' : ''}" style="white-space:nowrap">${dd(dleft(x.end))}</b></span><span class="foot"><span class="open">LH 청약플러스</span><span class="go">공고 보기 →</span></span></a>`;
   fs.writeFileSync(path.join(OUT, 'lh.html'), page('LH 임대·분양 공고 마감 순', `
-<h1>LH 집 공고</h1><p class="lead">LH(한국토지주택공사)가 지금 받는 임대·분양 공고 ${all.length}건을 마감이 가까운 순으로 모았어요. 누르면 LH 청약플러스 공고로 가요.</p>
+<h1>LH 집 공고</h1><p class="lead">누르면 LH 청약플러스 공고로 가요.</p>
 <div class="srctabs"><button data-t="" class="on">전체 <small>${all.length}</small></button>${T.map((t) => `<button data-t="${t}">${t} <small>${all.filter((x) => tab(x) === t).length}</small></button>`).join('')}</div>
 <div class="filters"><input id="lq" placeholder="지역·단지 이름 찾기" style="flex:1 1 220px"><select id="lr"><option value="">모든 지역</option>${R.map((r) => `<option>${esc(r)}</option>`).join('')}</select><select id="lk"><option value="">모든 종류</option>${K.map((k) => `<option>${esc(k)}</option>`).join('')}</select></div>
 <div class="sorts"><button data-s="end" class="on">마감 임박순</button><button data-s="new">새로 올라온 순</button><span class="reset" id="lreset">조건 초기화</span></div>
 <p class="note">맞는 공고 <b id="lcnt">${all.length}</b>건</p>
-<div class="grid" id="lhl">${all.map(card).join('')}</div><p class="note" id="lempty" hidden>맞는 공고가 없어요. 조건을 줄이거나 초기화해 보세요.</p>
+<div class="grid" id="lhl">${all.map(card).join('')}</div><p class="note" id="lempty" hidden>맞는 공고가 없어요.</p>
 <div class="box" style="white-space:normal;margin-top:18px"><b>공고 보는 법</b><div>· 임대 = 영구·국민·행복·통합공공·매입임대처럼 보증금·월세를 내고 사는 집 · 분양 = 사서 들어가는 집 · 신혼희망 = 신혼부부·예비 신혼부부용</div><div>· 소득·자산 기준과 무주택 조건은 공고마다 달라요. 공고문의 "신청 자격"을 꼭 먼저 보세요.</div></div>
-<p class="note">LH 공공데이터를 깃허브가 4시간마다 새로 받아요. 토지·상가 공고는 뺐어요.</p>
+<p class="note">4시간마다 새로 받아요. 토지·상가는 뺐어요.</p>
 <script>(()=>{let T='';const L=lhl,C=[...L.children];const go=()=>{const q=lq.value.trim().toLowerCase(),r=lr.value,k=lk.value;let n=0;for(const c of C){const ok=(!T||c.dataset.t===T)&&(!r||c.dataset.r===r)&&(!k||c.dataset.k===k)&&(!q||c.dataset.q.includes(q));c.hidden=!ok;if(ok)n++}lcnt.textContent=n;lempty.hidden=n>0};
 document.querySelectorAll('.srctabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.srctabs button').forEach(x=>x.classList.toggle('on',x===b));T=b.dataset.t;go()});
 lq.oninput=go;lr.onchange=go;lk.onchange=go;

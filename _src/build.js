@@ -198,7 +198,7 @@ fs.writeFileSync(path.join(OUT, 'site.js'), `(()=>{const K='mongSaved';const get
 const base=(document.querySelector('link[rel=stylesheet]').getAttribute('href')||'').replace(/site\.css.*$/,'');
 const dl=e=>{const d=Math.round((Date.parse(e+'T00:00:00+09:00')-Date.now())/864e5+0.5);return d<0?'마감':d===0?'오늘 마감':'D-'+d};
 function paint(){const s=get();document.querySelectorAll('.star').forEach(b=>{const on=!!s[b.dataset.id];b.classList.toggle('on',on);b.textContent=b.classList.contains('mini')?(on?'★':'☆'):(on?'★ 찜함':'☆ 찜하기')});const c=document.getElementById('savedCnt');if(c){const n=Object.keys(s).length;c.textContent=n?n:''}
-const box=document.getElementById('savedList');if(box){const v=Object.entries(s).sort((a,b)=>a[1].end.localeCompare(b[1].end));box.innerHTML=v.length?v.map(([id,x])=>'<a class="card" style="margin:10px 0" href="'+base+'job/'+id+'.html"><span class="org-name">'+x.o+'</span><span class="sub">'+x.t+'</span><span class="when"><span>'+x.end.replace(/-/g,'.')+' 마감</span><b>'+dl(x.end)+'</b></span></a>').join(''):'<p class="note">아직 찜한 공고가 없어요. 공고 카드의 ☆ 를 눌러 보세요.</p>'}}
+const box=document.getElementById('savedList');if(box){const v=Object.entries(s).sort((a,b)=>a[1].end.localeCompare(b[1].end));box.innerHTML=v.length?v.map(([id,x])=>'<a class="card" style="margin:10px 0" href="'+base+'job/'+id+'.html"><span class="org-name">'+x.o+'</span><span class="sub">'+x.t+'</span><span class="when"><span>'+x.end.replace(/-/g,'.')+' 마감</span><b>'+dl(x.end)+'</b></span></a>').join(''):'<p class="note">찜한 공고가 없어요.</p>'}}
 document.addEventListener('click',e=>{const b=e.target.closest('.star');if(!b)return;e.preventDefault();e.stopPropagation();const s=get();if(s[b.dataset.id])delete s[b.dataset.id];else s[b.dataset.id]={t:b.dataset.t,o:b.dataset.o,end:b.dataset.end,at:Date.now()};put(s);paint()},true);paint();
 const today=new Date(Date.now()+9*36e5).toISOString().slice(0,10),dd=e=>Math.round((Date.parse(e)-Date.parse(today))/864e5);document.querySelectorAll('.card[data-end]').forEach(c=>{const d=dd(c.dataset.end);if(d<0){c.hidden=true;return}const b=c.querySelector('.dday');if(b&&d<=400){b.textContent=d===0?'오늘 마감':'D-'+d;b.classList.toggle('soon',d<=3)}const st=c.dataset.start;const o=c.querySelector('.foot .open, .foot .soon2');if(o&&st){if(dd(st)>0){o.className='soon2';o.textContent=(+st.slice(5,7))+'월 '+(+st.slice(8,10))+'일 접수 시작'}else if(o.classList.contains('soon2')){o.className='open';o.textContent='접수 중'}}});})();`);
 
@@ -219,7 +219,7 @@ fs.writeFileSync(path.join(OUT, 'index.html'), page('공공기관 채용 이번 
 <div class="grid" style="margin-top:16px"><a class="card" href="benefits.html" style="min-height:0"><span class="org-name">정부 지원금 찾기</span><span class="sub">많이 찾는 지원금 3,000개를 분야·대상으로 · 매일 새로</span></a><a class="card" href="benefits.html#hidden" style="min-height:0"><span class="org-name">숨은 돈 찾기</span><span class="sub">안 찾아간 보험금·휴면예금·카드포인트·환급금 조회</span></a><a class="card" href="pay-rank.html" style="min-height:0"><span class="org-name">공공기관 초임 순위</span><span class="sub">지금 공고 낸 기관 신입 초임 높은 순</span></a></div>
 <div class="regionbar"><span>지역으로 보기 <small>(여러 지역 공고는 지역마다 셈)</small></span>${regionsTop.map(([r, n]) => `<a href="jobs.html?r=${encodeURIComponent(r)}">${esc(r)} <small>${n}</small></a>`).join('')}</div>
 <h2>마감 임박 (3일 안)</h2><div class="grid">${uniqOrg(byEnd.filter((x) => dleft(x.end) <= 3 && !isDoctor(x))).slice(0, 12).map((x) => card(x)).join('')}</div>
-<h2>정규직 신입 모음</h2><p class="lead">신입만 뽑는 정규직 자리예요 (박사·연구책임자·의사·보훈 특채는 뺐어요). 전체 공고에서 "신입 받는 곳"으로 거르면 신입+경력 공고까지 나와요.</p><div class="grid">${uniqOrg(pf).slice(0, 12).map((x) => card(x)).join('')}</div>
+<h2>정규직 신입 모음</h2><p class="lead">신입만 뽑는 정규직 자리예요.</p><div class="grid">${uniqOrg(pf).slice(0, 12).map((x) => card(x)).join('')}</div>
 <h2>어제·오늘 새로 올라온 공고</h2><div class="grid">${uniqOrg(fresh.filter((x) => !isDoctor(x))).slice(0, 12).map((x) => card(x)).join('')}</div>
 <p style="margin-top:22px"><a class="btn p" href="jobs.html">전체 공고 ${items.length}건 보기</a></p>`, { on: 'home', desc: `공공기관 채용 이번 주 마감 공고 ${week.length}건, 정규직 신입 ${pf.length}건을 마감 순으로 정리했어요.` }));
 
@@ -227,14 +227,14 @@ fs.writeFileSync(path.join(OUT, 'index.html'), page('공공기관 채용 이번 
 const regions = [...new Set(items.flatMap((x) => arr(x.region)))].sort();
 fs.writeFileSync(path.join(OUT, 'jobs.html'), page('공공기관 채용 전체 공고', `
 <h1>전체 공고</h1>
-<div class="srctabs"><button data-src="" class="on">전체 <small>${items.length}</small></button>${Object.entries(SRC).filter(([k]) => items.some((x) => x.src === k)).map(([k, v]) => `<button data-src="${k}">${v} <small>${items.filter((x) => x.src === k).length}</small></button>`).join('')}</div><p class="lead">지원할 수 있는 공고 <b id="cnt">${items.length}</b>건 · 고르고 줄 세워 보세요.</p>
+<div class="srctabs"><button data-src="" class="on">전체 <small>${items.length}</small></button>${Object.entries(SRC).filter(([k]) => items.some((x) => x.src === k)).map(([k, v]) => `<button data-src="${k}">${v} <small>${items.filter((x) => x.src === k).length}</small></button>`).join('')}</div><p class="lead">공고 <b id="cnt">${items.length}</b>건</p>
 <div class="filters"><input id="fq" placeholder="기관·직무 찾기" style="flex:1 1 220px"><select id="fr"><option value="">모든 지역</option>${regions.map((r) => `<option>${esc(r)}</option>`).join('')}</select>
 <select id="fk"><option value="">모든 고용 형태</option><option>정규직</option><option>무기계약직</option><option>비정규직</option><option>청년인턴</option></select>
 <select id="fs"><option value="">신입·경력 모두</option><option value="신입">신입 받는 곳</option></select>
 <select id="fe"><option value="">학력 모두</option><option value="학력무관">학력 무관</option><option value="고졸">고졸 가능</option></select></div>
 <div class="sorts"><button data-s="end" class="on">마감 임박순</button><button data-s="new">새로 올라온 순</button><button data-s="pay">초임 높은 순</button><button data-s="n">많이 뽑는 순</button><span class="reset" id="rs">조건 초기화</span></div>
 <div class="grid" id="list">${byEnd.map((x) => card(x).replace('<div class="card"', `<div class="card" data-src="${x.src}" data-r="${esc(arr(x.region).join(' '))}" data-k="${esc(kindGroup(x))}" data-s="${esc(x.se || '')}" data-e="${esc(x.acbg || '')}" data-end="${x.end}" data-new="${x.start || ''}" data-pay="${payOk(x) ? (entryBy[x.inst] || {}).total || 0 : 0}" data-n="${x.n || 0}" data-q="${esc((x.inst + ' ' + x.title + ' ' + (x.ncs || '')).toLowerCase())}"`)).join('')}</div>
-<p class="note" id="empty" hidden>맞는 공고가 없어요. 조건을 줄이거나 초기화해 보세요.</p>
+<p class="note" id="empty" hidden>맞는 공고가 없어요.</p>
 <script>
 const L=document.getElementById('list'),cards=[...L.children];
 let SRCF='';document.querySelectorAll('.srctabs button').forEach(b=>b.onclick=()=>{SRCF=b.dataset.src;document.querySelectorAll('.srctabs button').forEach(x=>x.classList.toggle('on',x===b));f();});
@@ -340,7 +340,7 @@ ${w && w.sources.length ? `<h2>출처</h2><div class="box" style="white-space:no
 }
 
 // 💰 공공기관 신입 초임 순위 (11/27 — 사이트 계획 "공공기관 초봉 순위", 우리가 모아 줄 세운 표 = 손이 간 내용)
-fs.writeFileSync(path.join(OUT, 'pay-rank.html'), page('공공기관 신입 초임 순위', `<h1>공공기관 신입 초임 순위</h1><p class="lead">지금 공고를 낸 공공기관 ${payRank.length}곳의 신입 초임을 높은 순으로 줄 세웠어요. 숫자는 모두 ${esc((payRank[0] || [, {}])[1].year || '')} 기준이에요.</p>
+fs.writeFileSync(path.join(OUT, 'pay-rank.html'), page('공공기관 신입 초임 순위', `<h1>공공기관 신입 초임 순위</h1><p class="lead">공공기관 ${payRank.length}곳 신입 초임 · 알리오 공시 ${esc((payRank[0] || [, {}])[1].year || '')} 기준</p>
 <div class="box" style="white-space:normal;margin:12px 0"><b>초임 숫자 읽는 법</b><div>· 알리오 경영공시의 "신입사원 초임"이에요. 대학 졸업·사무직·군 미필·경력 없는 사람이 가장 낮은 직급으로 들어갈 때 1년 동안 받는 돈(세금 떼기 전)이에요.</div><div>· 기본급에 각종 수당과 성과급이 들어 있어요. 성과급은 기관 평가에 따라 해마다 달라져요.</div><div>· 기술직·연구직·의료직처럼 직무가 다르거나 경력이 있으면 실제 급여는 달라요. 지원할 공고의 보수 칸을 꼭 함께 보세요.</div><div>· 한 달에 실제로 얼마 받는지는 <a href="calc.html" style="text-decoration:underline">실수령 계산기</a>로 대략 볼 수 있어요.</div></div>
 <div class="filters"><input id="pq" placeholder="기관 찾기" style="flex:1 1 220px"></div>
 <table id="pt" class="rank"><tr><th>순위</th><th>기관</th><th>신입 초임</th><th class="now">지금 공고</th></tr>${payRank.map(([k, v], i) => `<tr data-q="${esc(k.toLowerCase())}"><td>${payRank.findIndex(([, w]) => w.total === v.total) + 1}</td><td><a href="org/${slug(k)}.html" style="text-decoration:underline">${esc(k)}</a> </td><td style="white-space:nowrap"><b>약 ${man(v.total)}</b></td><td class="now">${(orgs[k] || []).length ? `${orgs[k].length}건` : '-'}</td></tr>`).join('')}</table>
@@ -353,7 +353,7 @@ fs.writeFileSync(path.join(OUT, 'pay-rank.html'), page('공공기관 신입 초�
   const all = Object.keys(orgs).sort((a, b) => orgs[b].length - orgs[a].length || a.localeCompare(b, 'ko'));
   const wCard = (k) => `<a class="card" href="org/${slug(k)}.html" style="min-height:0"><span class="org-name" style="white-space:normal">${esc(k)}</span><span class="sub">${esc(ORGW[k].desc || '')}</span><span class="foot"><span class="open">지금 공고 ${(orgs[k] || []).length}건${entryBy[k] ? ' · 초임 약 ' + man(entryBy[k].total) : ''}</span><span class="go">읽기 →</span></span></a>`;
   const row = (k) => `<tr data-q="${esc(k.toLowerCase())}"><td><a href="org/${slug(k)}.html" style="text-decoration:underline">${esc(k)}</a>${ORGW[k] ? ' <span class="note">정리 글</span>' : ''}</td><td>${orgs[k].length}건</td><td>${entryBy[k] ? '약 ' + man(entryBy[k].total) : '-'}</td></tr>`;
-  fs.writeFileSync(path.join(OUT, 'orgs.html'), page('기관 정보 — 공공기관 채용 전형·필기·초임', `<h1>기관 정보</h1><p class="lead">공공기관마다 어떻게 뽑는지, 필기는 무엇을 보는지, 신입 초임은 얼마인지 정리했어요. 정리 글 아래에는 그 기관의 지금 공고가 저절로 붙어요.</p>
+  fs.writeFileSync(path.join(OUT, 'orgs.html'), page('기관 정보 — 공공기관 채용 전형·필기·초임', `<h1>기관 정보</h1><p class="lead">기관마다 전형·필기·초임을 정리했어요.</p>
 <p class="btns"><a class="btn p" href="pay-rank.html">공공기관 신입 초임 순위</a></p>
 ${W.length ? `<h2>정리한 기관</h2><div class="grid">${W.map(wCard).join('')}</div>` : ''}
 <h2>공고 낸 기관 전체 (${all.length}곳)</h2><div class="filters"><input id="oq" placeholder="기관 찾기" style="flex:1 1 220px"></div>
@@ -362,7 +362,7 @@ ${W.length ? `<h2>정리한 기관</h2><div class="grid">${W.map(wCard).join('')
   console.log(`  🏢 기관 정보: 정리 글 ${W.length} · 공고 낸 기관 ${all.length}`);
 }
 
-fs.writeFileSync(path.join(OUT, 'saved.html'), page('찜한 공고', `<h1>찜한 공고</h1><p class="lead">별표(☆)를 누른 공고예요. 이 휴대폰·컴퓨터에만 저장돼요 (로그인 없음).</p><div id="savedList"></div>`, { on: 'saved', noindex: true }));
+fs.writeFileSync(path.join(OUT, 'saved.html'), page('찜한 공고', `<h1>찜한 공고</h1><p class="lead">이 기기에만 저장돼요.</p><div id="savedList"></div>`, { on: 'saved', noindex: true }));
 
 // 개인정보처리방침 (11/26 하루 조사: 애드센스는 쿠키 안내 세 가지가 꼭 — support.google.com/adsense/answer/1348695)
 fs.writeFileSync(path.join(OUT, 'privacy.html'), page('개인정보처리방침', `<h1>개인정보처리방침</h1><div class="box" style="white-space:normal">

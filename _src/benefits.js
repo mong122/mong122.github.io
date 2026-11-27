@@ -38,15 +38,15 @@ ${box('누가 받나요', x.who)}${box('무엇을 받나요', x.what)}
     ['건강보험 환급금', '본인부담상한제·더 낸 보험료', 'https://www.nhis.or.kr', '국민건강보험공단'],
   ];
   fs.writeFileSync(path.join(OUT, 'benefits.html'), page('정부 지원금 찾기', `
-<section class="hero" style="background:linear-gradient(135deg,#0f7b4b,#22a06b)"><h1>정부 지원금, 많이 찾는 것부터</h1><p>정부24 보조금24에 올라온 지원금 가운데 사람들이 많이 찾아본 ${top.length.toLocaleString('ko-KR')}개를 모았어요. 분야·대상으로 고르고 이름으로 찾아보세요.</p>
+<section class="hero" style="background:linear-gradient(135deg,#0f7b4b,#22a06b)"><h1>정부 지원금, 많이 찾는 것부터</h1><p>정부24 보조금24에 올라온 지원금 가운데 사람들이 많이 찾아본 ${top.length.toLocaleString('ko-KR')}개를 모았어요.</p>
 <form class="herosearch" onsubmit="event.preventDefault();bq.value=this.q.value;go()"><input name="q" placeholder="지원금 이름이나 낱말로 찾기"><button>찾기</button></form></section>
-<h2 id="hidden">숨은 돈 찾기 바로가기</h2><p class="lead">이름만 넣으면 조회되는 공식 누리집이에요. 몰라서 안 찾아간 돈이 있는지 한 번씩 확인해 보세요.</p>
+<h2 id="hidden">숨은 돈 찾기 바로가기</h2><p class="lead">이름만 넣으면 조회되는 공식 누리집이에요.</p>
 <div class="grid">${HIDDEN.map(([t, d, u, s]) => `<a class="card" href="${u}" rel="nofollow noreferrer" target="_blank"><span class="org-name">${t}</span><span class="sub">${d}</span><span class="foot"><span class="open">${s}</span><span class="go">바로가기 →</span></span></a>`).join('')}</div>
 <h2>지원금 찾기</h2>
 <div class="srctabs" id="ftabs"><button data-f="" class="on">전체</button>${fields.map((x) => `<button data-f="${esc(x)}">${esc(x)}</button>`).join('')}</div>
 <div class="filters"><input id="bq" placeholder="이름·내용으로 찾기" style="flex:1 1 220px"><select id="bu"><option value="">모든 대상</option><option>개인</option><option>가구</option><option>소상공인</option></select><select id="bt"><option value="">모든 지원 방식</option>${types.map((x) => `<option>${esc(x)}</option>`).join('')}</select></div>
 <p class="note" id="bcnt"></p><div class="grid" id="blist"></div><p style="text-align:center;margin:18px 0"><button class="btn" id="bmore" type="button">더 보기</button></p>
-<p class="note">정부24(보조금24) 공개 자료를 깃허브가 4시간마다 새로 받아요 (${today} 기준). 금액·기한은 바뀔 수 있으니 신청 전 정부24에서 꼭 확인하세요.</p>
+<p class="note">정부24 자료 · ${today} 기준 · 신청 전 원문 확인</p>
 <script>(async()=>{const D=await (await fetch('benefits-data.json?v=${BUILD}')).json();let F='',N=30,L=[];const V=n=>n>=1e4?Math.round(n/1e4).toLocaleString('ko-KR')+'만':n.toLocaleString('ko-KR');
 const e=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const card=x=>'<a class="card" href="'+(x[9]?'benefit/'+x[0]+'.html':e(x[10]))+'"'+(x[9]?'':' target="_blank" rel="nofollow noreferrer"')+'><span class="org-name">'+e(x[1])+'</span><span class="sub">'+e(x[2])+'</span><span class="chips"><span class="c c-kind">'+e(x[4])+'</span><span class="c c-se">'+e(x[6])+'</span><span class="c">'+e(x[5])+'</span></span><span class="when"><span>'+e(x[3])+'</span><b style="font-size:13px;color:var(--sub)">조회 '+V(x[7])+'</b></span><span class="foot"><span class="open">'+e((x[8]||'').replace(/[○□ㅇ※]/g,' ').replace(/\s+/g,' ').trim().slice(0,22)||'기한 확인')+'</span><span class="go">자세히 →</span></span></a>';
