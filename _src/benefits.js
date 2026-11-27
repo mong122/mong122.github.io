@@ -5,11 +5,13 @@ module.exports = function benefits({ fs, path, OUT, DATA, page, esc, today, BUIL
   if (!fs.existsSync(f)) { console.log('  🎁 지원금: 자료 없음 (깃허브가 받으면 생김)'); return 0; }
   const all = (JSON.parse(fs.readFileSync(f, 'utf8')).items || []).filter((x) => /개인|가구|소상공인/.test(x.user));
   all.sort((a, b) => b.views - a.views);
-  const top = all.slice(0, 3000);
+  // 지원 방식 정리 (11/27 — '현금||현금(감면)' 같은 원래 글자가 고르기 칸에 그대로 나오던 것)
+  const tyOf = (t) => { t = String(t || ''); return /융자/.test(t) ? '융자' : /감면/.test(t) ? '감면' : /보험/.test(t) ? '보험' : /^현금/.test(t) ? '현금' : /이용권/.test(t) ? '이용권' : /현물/.test(t) ? '현물' : /서비스|의료|일자리|교육/.test(t) ? '서비스' : '기타'; };
+  const top = all.slice(0, 3000).map((x) => ({ ...x, type: tyOf(x.type) }));
   const PAGES = 600;
   const users = (u) => String(u || '').split('||').filter((x) => x !== '법인/시설/단체');
   const fields = [...new Set(top.map((x) => x.field).filter(Boolean))];
-  const types = [...new Set(top.map((x) => x.type).filter(Boolean))].slice(0, 12);
+  const types = ['현금', '융자', '감면', '서비스', '현물', '이용권', '보험', '기타'].filter((t) => top.some((x) => x.type === t));
   const views = (n) => (n >= 10000 ? `${Math.round(n / 10000).toLocaleString('ko-KR')}만` : n.toLocaleString('ko-KR'));
   // 목록 자료 (짧게)
   fs.writeFileSync(path.join(OUT, 'benefits-data.json'), JSON.stringify(top.map((x, i) => [x.id, x.name, x.sum, x.org, x.field, x.type, users(x.user).join('·'), x.views, x.when, i < PAGES ? 1 : 0, x.url])));

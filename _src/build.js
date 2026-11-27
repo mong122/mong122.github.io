@@ -31,10 +31,10 @@ const SRC = { alio: '공공기관', gojobs: '공무원·공무직', cleaneye: '�
 const pool = (k) => ((st['apiPool:' + k] || {}).items || []).filter((x) => x.end && /^\d{4}-\d\d-\d\d$/.test(x.end) && dleft(x.end) >= 0);
 const items = [
   ...pool('alio').map((x) => ({ ...x, src: 'alio', n: x.n || x.nope || 0 })),
-  ...pool('gojobs').map((x) => ({ ...x, src: 'gojobs', start: x.start || x.posted || '', n: +x.nope || 0, url: x.url })),
+  ...pool('gojobs').map((x) => ({ ...x, src: 'gojobs', start: x.start && x.start <= x.end ? x.start : x.posted || '', n: +x.nope || 0, url: x.url })),
   ...pool('cleaneye').map((x) => ({ ...x, src: 'cleaneye', n: +x.nope || 0, region: arr(x.region).map((r) => String(r).replace(/특별자치시|특별자치도|특별시|광역시|도$/g, '').replace(/^(충청|전라|경상)(남|북)$/, (m, a, b) => ({ 충청: '충', 전라: '전', 경상: '경' })[a] + b)) })),
   ...pool('w24').filter((x) => /대기업|중견|외국계/.test(x.se || '')).map((x) => ({ ...x, src: 'w24', n: +x.nope || 0, hire: arr(x.hire).flatMap((h) => String(h).split(/[|·,]/)).map((h) => h.trim()).filter(Boolean) })), // 공기업·공공기관은 잡알리오와 겹쳐서 뺌
-]; // 인원 칸 = nope (11/27 하루: 많이 뽑는 순이 안 됨)
+].filter((x) => !/합격자\s*(발표|공고|안내|명단)|최종\s*합격|결과\s*(발표|공고|안내)/.test(x.title || '')); // 11/27 합격자 발표는 지원할 수 있는 공고가 아니라 뺌 · 인원 칸 = nope (11/27 하루: 많이 뽑는 순이 안 됨)
 const blog = {}; // 공고 번호 → MONG 글
 for (const j of st.deskJobs || []) {
   const h = j.hireItem;
@@ -48,7 +48,7 @@ for (const j of st.deskJobs || []) if (j.entry && j.entry.total && j.hireItem &&
 const ENTRY_F = path.join(DATA, 'entry.json');
 if (fs.existsSync(ENTRY_F)) for (const [k, v] of Object.entries(JSON.parse(fs.readFileSync(ENTRY_F, 'utf8')))) if (!v.none && !entryBy[k]) entryBy[k] = v;
 
-const kindOf = (x) => { const h = arr(x.hire).join(' '); return /비정규/.test(h) ? '비정규직' : /무기계약/.test(h) ? '무기계약직' : /인턴/.test(h) ? '청년인턴' : /정규직/.test(h) ? '정규직' : h || '-'; };
+const kindOf = (x) => { const h = arr(x.hire).join(' ').replace(/\be\d+\b/g, '').trim(); if (!h || h === x.se) return ''; return /비정규/.test(h) ? '비정규직' : /무기계약/.test(h) ? '무기계약직' : /인턴/.test(h) ? '청년인턴' : /정규직/.test(h) ? '정규직' : h; };
 const isDoctor = (x) => /의사\(|의사직|별정직 의사|전문의/.test(x.title) || (/전공의|레지던트|전임의|진료|(?:병원|의료원).*인턴|^\s*\S*\s*인턴 모집|치과 인턴/.test(`${x.inst} ${x.title}`) && /병원|의료원/.test(`${x.inst} ${x.title}`) && !/체험형|청년|행정|사무/.test(x.title));
 // 고르기 칸 4가지로 묶기 (카드 글자는 그대로) — 기간제·계약직 등은 비정규직 (11/27 대기업·중견 고르기가 0건이던 것)
 const kindGroup = (x) => { const k = kindOf(x); return /^(정규직|무기계약직|비정규직|청년인턴)$/.test(k) ? k : /기간제|계약직|시간제|파견|대체|촉탁|비상임/.test(k) ? '비정규직' : k; };
@@ -81,7 +81,7 @@ function ours(draft) {
   }
   const qa = [...draft.matchAll(/^Q\.\s*(.+)\n+A\.\s*([\s\S]+?)(?=\n\s*\n|\nQ\.|$)/gm)].slice(0, 5);
   if (qa.length) out.push(`<h2>자주 묻는 질문</h2>${qa.map((m) => `<div class="box" style="white-space:normal;margin:8px 0"><b>Q. ${esc(unmark(m[1]))}</b><div>${esc(unmark(m[2]).replace(/\n/g, ' '))}</div></div>`).join('')}`);
-  return out.length ? `<h2>몽 채용노트 정리</h2><p class="lead">공고문을 하나하나 읽고 정리한 내용이에요.</p>${out.join('')}` : '';
+  return out.length ? `<h2>공고 정리</h2>${out.join('')}` : '';
 }
 
 // 📝 핵심 3줄 (site/notes.js — 하루가 공고 자료로) 
@@ -172,7 +172,7 @@ const card = (x, up = '') => {
   const before = x.start && dleft(x.start) > 0;
   const many = (orgs[x.inst] || []).length;
   const chips = [
-    `<span class="c c-kind">${esc(kindOf(x))}</span>`,
+    kindOf(x) ? `<span class="c c-kind">${esc(kindOf(x))}</span>` : '',
     x.se ? `<span class="c ${x.src === 'alio' ? 'c-se' : ''}">${esc(x.se)}</span>` : '',
     regionShort(x) ? `<span class="c c-rg">${esc(regionShort(x))}</span>` : '',
     x.n >= 10 ? `<span class="c c-big">${x.n}명 채용</span>` : x.n ? `<span class="c">${x.n}명</span>` : '',
@@ -204,7 +204,7 @@ const today=new Date(Date.now()+9*36e5).toISOString().slice(0,10),dd=e=>Math.rou
 
 const byEnd = [...items].sort((a, b) => a.end.localeCompare(b.end));
 const week = byEnd.filter((x) => dleft(x.end) <= 7);
-const fresh = items.filter((x) => x.start && dleft(x.start) >= -1).sort((a, b) => b.start.localeCompare(a.start));
+const fresh = items.filter((x) => x.start && dleft(x.start) >= -1 && dleft(x.start) <= 0).sort((a, b) => b.start.localeCompare(a.start));
 const pf = byEnd.filter(isPermFresh);
 const uniqOrg = (l) => { const seen = new Set(); return l.filter((x) => !seen.has(x.inst) && seen.add(x.inst)); }; // 첫 화면 칸은 기관마다 하나
 const orgs = {};
@@ -213,11 +213,11 @@ for (const x of items) (orgs[x.inst] = orgs[x.inst] || []).push(x);
 const regionsTop = Object.entries(items.reduce((m, x) => { for (const r of arr(x.region)) m[r] = (m[r] || 0) + 1; return m; }, {})).sort((p, q) => q[1] - p[1]).slice(0, 12);
 // 첫 화면
 fs.writeFileSync(path.join(OUT, 'index.html'), page('공공기관 채용 이번 주 마감', `
-<section class="hero"><h1>공공기관 채용, 마감 전에 한눈에</h1><p>공공기관·공무원·공무직 공고를 매일 모아 마감이 가까운 순으로 보여 드려요.</p>
+<section class="hero"><h1>공공기관 채용, 마감 전에 한눈에</h1><p>공공기관·공무원·공무직 공고를 마감 순으로 모았어요.</p>
 <form class="herosearch" action="jobs.html"><input name="q" placeholder="기관 이름이나 직무로 찾기"><button>찾기</button></form>
 <div class="stats"><div class="stat"><b>${items.length}건</b>지원할 수 있는 공고</div><div class="stat"><b>${week.length}건</b>7일 안 마감</div><div class="stat"><b>${pf.length}건</b>정규직 신입</div><div class="stat"><b>${fresh.length}건</b>새로 올라온 공고</div></div></section>
-<div class="grid" style="margin-top:16px"><a class="card" href="benefits.html" style="min-height:0"><span class="org-name">정부 지원금 찾기</span><span class="sub">많이 찾는 지원금 3,000개를 분야·대상으로 · 매일 새로</span></a><a class="card" href="benefits.html#hidden" style="min-height:0"><span class="org-name">숨은 돈 찾기</span><span class="sub">안 찾아간 보험금·휴면예금·카드포인트·환급금 조회</span></a><a class="card" href="pay-rank.html" style="min-height:0"><span class="org-name">공공기관 초임 순위</span><span class="sub">지금 공고 낸 기관 신입 초임 높은 순</span></a></div>
-<div class="regionbar"><span>지역으로 보기 <small>(여러 지역 공고는 지역마다 셈)</small></span>${regionsTop.map(([r, n]) => `<a href="jobs.html?r=${encodeURIComponent(r)}">${esc(r)} <small>${n}</small></a>`).join('')}</div>
+<div class="grid" style="margin-top:16px"><a class="card" href="benefits.html" style="min-height:0"><span class="org-name">정부 지원금 찾기</span><span class="sub">많이 찾는 지원금 3,000개</span></a><a class="card" href="benefits.html#hidden" style="min-height:0"><span class="org-name">숨은 돈 찾기</span><span class="sub">보험금·휴면예금·카드포인트·환급금 조회</span></a><a class="card" href="pay-rank.html" style="min-height:0"><span class="org-name">공공기관 초임 순위</span><span class="sub">신입 초임 높은 순</span></a></div>
+<div class="regionbar"><span>지역으로 보기</span>${regionsTop.map(([r, n]) => `<a href="jobs.html?r=${encodeURIComponent(r)}">${esc(r)} <small>${n}</small></a>`).join('')}</div>
 <h2>마감 임박 (3일 안)</h2><div class="grid">${uniqOrg(byEnd.filter((x) => dleft(x.end) <= 3 && !isDoctor(x))).slice(0, 12).map((x) => card(x)).join('')}</div>
 <h2>정규직 신입 모음</h2><p class="lead">신입만 뽑는 정규직 자리예요.</p><div class="grid">${uniqOrg(pf).slice(0, 12).map((x) => card(x)).join('')}</div>
 <h2>어제·오늘 새로 올라온 공고</h2><div class="grid">${uniqOrg(fresh.filter((x) => !isDoctor(x))).slice(0, 12).map((x) => card(x)).join('')}</div>
@@ -258,14 +258,14 @@ for (const x of items) {
   const eShow = payOk(x) ? e : null;
   const rows = [
     ['기관', `<a href="../org/${slug(x.inst)}.html" style="text-decoration:underline">${esc(x.inst)}</a>`],
-    ['고용 형태', esc(arr(x.hire).join(', '))],
+    ['고용 형태', esc(kindOf(x))],
     [x.src === 'gojobs' ? '기관 구분' : '신입·경력', esc(x.se || '')],
     ['뽑는 인원', x.n ? `${x.n}명` : ''],
     ['근무 지역', esc(arr(x.region).join('·'))],
     ['학력', esc(x.acbg || '')],
     ['직무 분야', esc(String(x.ncs || '').replace(/\./g, '·'))],
     ['접수 기간', `${md(x.start)} ~ ${md(x.end)} <span class="dd ${d > 7 ? 'far' : ''}">${d === 0 ? '오늘 마감' : `D-${d}`}</span>`],
-    ...(eShow ? [['신입 초임 (알리오 공시)', `약 ${man(e.total)} <span class="note">${esc(e.year || '')} 대졸·사무직 신입 기준 · 직무·직급마다 다를 수 있어요 · <a href="../calc.html?y=${e.total}" style="text-decoration:underline">실수령 계산</a></span>`]] : []),
+    ...(eShow ? [['신입 초임 (알리오 공시)', `약 ${man(e.total)} <span class="note">${esc(e.year || '')} · <a href="../calc.html?y=${e.total}" style="text-decoration:underline">실수령 계산</a></span>`]] : []),
   ];
   // 공고문 글을 읽기 좋게 (11/27 사장님 "글자 이상해") — 번호·□·ㅇ·- 기호 떼고 점 목록 · <소제목>은 굵게 · ※ 는 작은 주의 글
   const sec = (h, t) => {
@@ -281,19 +281,18 @@ for (const x of items) {
   };
   fs.writeFileSync(path.join(OUT, 'job', x.id + '.html'), page(`${x.inst} 채용 ${titleClean(x.title)}`, `
 <div class="crumb"><a href="../index.html">처음</a> › <a href="../jobs.html">전체 공고</a> › ${esc(x.inst)}</div>
-<h1>${esc(titleShort(x))}</h1><p class="lead">${esc(x.inst)} · ${esc(kindOf(x))}${x.n ? ` ${x.n}명` : ''} · ${md(x.end)} 마감</p>
-${NOTES[x.id] ? `<div class="keynote"><b>핵심 3줄</b>${NOTES[x.id].lines.map(([k, v]) => `<div><span>${esc(k)}</span>${esc(v)}</div>`).join('')}<p class="note">공고 자료를 읽고 정리했어요. 지원 전에 원문 공고를 꼭 확인하세요.</p></div>` : ''}
+<h1>${esc(titleShort(x))}</h1><p class="lead">${esc(x.inst)}${kindOf(x) ? ' · ' + esc(kindOf(x)) : ''}${x.n ? ` ${x.n}명` : ''} · ${md(x.end)} 마감</p>
+${NOTES[x.id] ? `<div class="keynote"><b>핵심 3줄</b>${NOTES[x.id].lines.map(([k, v]) => `<div><span>${esc(k)}</span>${esc(v)}</div>`).join('')}</div>` : ''}
 <table>${rows.filter(([, v]) => v).map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
 <div class="btns"><a class="btn p" id="go-orig" href="${origOf(x)}" data-m="${mobileUrl(x.id) || origOf(x)}" rel="nofollow noreferrer" target="_blank">${SRC_NAME[x.src]}에서 원문 공고 보기</a>${x.url && x.src === 'alio' ? `<a class="btn" href="${esc(x.url)}" rel="nofollow noreferrer" target="_blank">기관 채용 사이트</a>` : ''}<button class="btn star" data-id="${x.id}" data-t="${esc(titleShort(x))}" data-o="${esc(x.inst)}" data-end="${x.end}" type="button">☆ 찜하기</button><a class="btn" download="${x.id}-마감.ics" href="data:text/calendar;charset=utf-8,${encodeURIComponent(['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//mong//jobs//KO','BEGIN:VEVENT',`UID:${x.id}@mongnote.com`,`DTSTART;VALUE=DATE:${x.end.replace(/-/g, '')}`,`SUMMARY:[마감] ${x.inst} ${titleShort(x).slice(0, 40)}`,`URL:${SITE_URL}/job/${x.id}.html`,'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:내일 마감','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n'))}">달력에 마감일 넣기</a></div>
 ${x.src === 'w24' ? '<p class="note">정보출처 고용24 · 본 자료는 고용노동부 고용24(www.work24.go.kr)에서 제공된 정보이며, 무단복제 및 배포를 금지합니다.</p>' : ''}
 <div class="floatgo"><a class="btn p" id="go-float" href="${origOf(x)}" rel="nofollow noreferrer" target="_blank">원문 공고 보기 · ${ddTxt(d)}</a></div>
 <script>if(/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)){for(const a of [document.getElementById('go-orig'),document.getElementById('go-float')])a.href=document.getElementById('go-orig').dataset.m;}</script>
-${b && b.url ? `<div class="box" style="background:var(--accent-soft);border-color:transparent;white-space:normal"><b>자세한 정리 글이 있어요</b><br>공고문을 하나하나 읽어 일정·자격·전형을 정리했어요. <a href="${esc(b.url)}" style="text-decoration:underline">${esc(b.title || '블로그 글 보기')}</a></div>` : ''}
 ${b && b.draft ? ours(b.draft) : ''}
 ${orgMore(x.inst)}
 ${sec('지원 자격', x.qual)}${sec('우대 사항', x.prefMore || x.pref)}
 ${sec('전형 절차', x.screen)}
-${others.length ? `<h2>${esc(x.inst)}의 다른 공고</h2><div class="grid">${others.slice(0, 6).map((y) => card(y, '../')).join('')}</div>` : ''}`, { depth: 1, noindex: !((b && b.url) || NOTES[x.id]), desc: `${x.inst} ${kindOf(x)} ${x.n ? x.n + '명' : ''} 채용, ${md(x.end)} 마감. 지원 자격·전형 절차·초봉 정리.` }));
+${others.length ? `<h2>${esc(x.inst)}의 다른 공고</h2><div class="grid">${others.slice(0, 6).map((y) => card(y, '../').replace(/<a class="c c-more"[^>]*>[^<]*<\/a>/, '')).join('')}</div>` : ''}`, { depth: 1, noindex: !((b && b.url) || NOTES[x.id]), desc: `${x.inst} ${kindOf(x)} ${x.n ? x.n + '명' : ''} 채용, ${md(x.end)} 마감. 지원 자격·전형 절차·초봉 정리.` }));
 }
 
 // 🗄 마감된 공고 쪽 (60일)
@@ -331,9 +330,9 @@ for (const inst of new Set([...Object.keys(orgs), ...Object.keys(ORGW)])) {
 <div class="crumb"><a href="../index.html">처음</a> › <a href="../orgs.html">기관 정보</a> › ${esc(inst)}</div>
 <h1>${esc(w ? w.title : inst + ' 채용')}</h1><p class="lead">${w ? esc(w.desc || '') + '<br>' : ''}지금 받는 공고 ${list.length}건${e ? ` · 신입 초임 약 ${man(e.total)}` : ''}</p>
 ${list.length ? `<p class="btns"><a class="btn p" href="#now">지금 받는 공고 ${list.length}건 보기</a></p>` : ''}
-${w ? `<article class="guide">${w.html}</article><p class="note">${esc(w.date || '')} 정리 · 공식 자료를 읽고 정리했어요. 전형·과목은 공고마다 바뀔 수 있으니 지원할 공고문을 꼭 확인하세요.</p>` : ''}
+${w ? `<article class="guide">${w.html}</article><p class="note">${esc(w.date || '')} · 전형·과목은 공고마다 바뀔 수 있어요.</p>` : ''}
 ${payBox}
-<h2 id="now">지금 받는 공고</h2>${list.length ? `<div class="grid">${list.sort((p, q) => p.end.localeCompare(q.end)).map((y) => card(y, '../')).join('')}</div>` : `<p class="note">지금 받는 공고가 없어요. 새 공고가 올라오면 여기에 저절로 보여요.</p>`}
+<h2 id="now">지금 받는 공고</h2>${list.length ? `<div class="grid">${list.sort((p, q) => p.end.localeCompare(q.end)).map((y) => card(y, '../').replace(/<a class="c c-more"[^>]*>[^<]*<\/a>/, '')).join('')}</div>` : `<p class="note">지금 받는 공고가 없어요.</p>`}
 ${past.length ? `<h2>몽 채용노트 정리 글</h2><div class="box" style="white-space:normal">${past.map((j) => `<div>· <a href="${esc(j.published.url)}" style="text-decoration:underline" rel="noreferrer" target="_blank">${esc(j.published.title)}</a></div>`).join('')}</div>` : ''}
 ${w && w.sources.length ? `<h2>출처</h2><div class="box" style="white-space:normal">${w.sources.map((u) => `<div>· <a href="${esc(u)}" rel="nofollow noreferrer" target="_blank" style="text-decoration:underline">${esc(u.replace(/^https?:\/\//, '').slice(0, 70))}</a></div>`).join('')}</div>` : ''}
 <p class="btns"><a class="btn" href="../orgs.html">다른 기관 보기</a><a class="btn" href="../pay-rank.html">초임 순위</a>${e ? `<a class="btn" href="../calc.html?y=${e.total}">이 초임 실수령 계산</a>` : ''}</p>`, { depth: 1, noindex: !(w || past.length), desc: w ? w.desc : `${inst} 채용 공고 ${list.length}건 · 신입 초임 정리` }));

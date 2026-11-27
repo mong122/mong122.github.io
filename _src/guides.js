@@ -44,10 +44,10 @@ module.exports = function guides({ fs, path, OUT, page, esc, ROOT }) {
     list.push({ slug, ...meta });
     fs.writeFileSync(path.join(OUT, 'guide', slug + '.html'), page(meta.title, `
 <div class="crumb"><a href="../index.html">처음</a> › <a href="../guides.html">가이드</a> › ${esc(meta.cat || '')}</div>
-<h1>${esc(meta.title)}</h1><p class="lead">${esc(meta.desc || '')}</p><p class="note">${esc(meta.date || '')} 정리 · 몽 채용노트</p>
+<h1>${esc(meta.title)}</h1><p class="lead">${esc(meta.desc || '')}</p><p class="note">${esc(meta.date || '')}</p>
 <article class="guide">${md(m[2])}</article>
 ${sources.length ? `<h2>출처</h2><div class="box" style="white-space:normal">${sources.map((u) => `<div>· <a href="${esc(u)}" rel="nofollow noreferrer" target="_blank" style="text-decoration:underline">${esc(u.replace(/^https?:\/\//, '').slice(0, 70))}</a></div>`).join('')}</div>` : ''}
-<p class="note">공식 자료를 읽고 정리한 글이에요. 금액·기한은 바뀔 수 있으니 신청 전에 출처의 원문을 꼭 확인하세요.</p>
+<p class="note">금액·기한은 바뀔 수 있어요. 신청 전 원문을 확인해 주세요.</p>
 <p><a class="btn" href="../guides.html">가이드 더 보기</a> <a class="btn" href="../benefits.html">지원금 찾기</a></p>`, { depth: 1, desc: meta.desc || meta.title }));
   }
   list.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
