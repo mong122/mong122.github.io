@@ -9,7 +9,7 @@ const path = require('path');
 const DATA = process.env.SITE_DATA || path.join(__dirname, 'data');
 const OUT = process.env.SITE_OUT || path.join(__dirname, 'out');
 let BUILD = Date.now().toString(36); // ↓ 아래 CSS 를 만든 뒤 CSS 내용으로 다시 정함 (11/27: 시각으로 하면 4시간마다 모든 쪽이 바뀐 것으로 올라가 저장소가 무거워짐) // CSS 새 판을 바로 받게 (11/27: 깃허브가 CSS 를 10분 묶어 둬 새 쪽 + 옛 모양이 섞여 보임)
-const SITE_URL = (process.env.SITE_URL || 'https://mong122.github.io').replace(/\/$/, ''); // 도메인 사면 SITE_URL 만 바꿈
+const SITE_URL = (process.env.SITE_URL || 'https://mongnote.com').replace(/\/$/, ''); // 도메인 사면 SITE_URL 만 바꿈
 const SITE = '몽 채용노트'; // 가칭 — 이름은 사장님이 정함
 
 const rd = (f) => { try { return JSON.parse(fs.readFileSync(path.join(DATA, f), 'utf8')); } catch (e) { return null; } };
@@ -277,7 +277,7 @@ for (const x of items) {
 <h1>${esc(titleShort(x))}</h1><p class="lead">${esc(x.inst)} · ${esc(kindOf(x))}${x.n ? ` ${x.n}명` : ''} · ${md(x.end)} 마감</p>
 ${NOTES[x.id] ? `<div class="keynote"><b>핵심 3줄</b>${NOTES[x.id].lines.map(([k, v]) => `<div><span>${esc(k)}</span>${esc(v)}</div>`).join('')}<p class="note">공고 자료를 읽고 정리했어요. 지원 전에 원문 공고를 꼭 확인하세요.</p></div>` : ''}
 <table>${rows.filter(([, v]) => v).map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
-<div class="btns"><a class="btn p" id="go-orig" href="${origOf(x)}" data-m="${mobileUrl(x.id) || origOf(x)}" rel="nofollow noreferrer" target="_blank">${SRC_NAME[x.src]}에서 원문 공고 보기</a>${x.url && x.src === 'alio' ? `<a class="btn" href="${esc(x.url)}" rel="nofollow noreferrer" target="_blank">기관 채용 사이트</a>` : ''}<button class="btn star" data-id="${x.id}" data-t="${esc(titleShort(x))}" data-o="${esc(x.inst)}" data-end="${x.end}" type="button">☆ 찜하기</button><a class="btn" download="${x.id}-마감.ics" href="data:text/calendar;charset=utf-8,${encodeURIComponent(['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//mong//jobs//KO','BEGIN:VEVENT',`UID:${x.id}@mong122.github.io`,`DTSTART;VALUE=DATE:${x.end.replace(/-/g, '')}`,`SUMMARY:[마감] ${x.inst} ${titleShort(x).slice(0, 40)}`,`URL:https://mong122.github.io/job/${x.id}.html`,'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:내일 마감','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n'))}">달력에 마감일 넣기</a></div>
+<div class="btns"><a class="btn p" id="go-orig" href="${origOf(x)}" data-m="${mobileUrl(x.id) || origOf(x)}" rel="nofollow noreferrer" target="_blank">${SRC_NAME[x.src]}에서 원문 공고 보기</a>${x.url && x.src === 'alio' ? `<a class="btn" href="${esc(x.url)}" rel="nofollow noreferrer" target="_blank">기관 채용 사이트</a>` : ''}<button class="btn star" data-id="${x.id}" data-t="${esc(titleShort(x))}" data-o="${esc(x.inst)}" data-end="${x.end}" type="button">☆ 찜하기</button><a class="btn" download="${x.id}-마감.ics" href="data:text/calendar;charset=utf-8,${encodeURIComponent(['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//mong//jobs//KO','BEGIN:VEVENT',`UID:${x.id}@mongnote.com`,`DTSTART;VALUE=DATE:${x.end.replace(/-/g, '')}`,`SUMMARY:[마감] ${x.inst} ${titleShort(x).slice(0, 40)}`,`URL:${SITE_URL}/job/${x.id}.html`,'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:내일 마감','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n'))}">달력에 마감일 넣기</a></div>
 ${x.src === 'w24' ? '<p class="note">정보출처 고용24 · 본 자료는 고용노동부 고용24(www.work24.go.kr)에서 제공된 정보이며, 무단복제 및 배포를 금지합니다.</p>' : ''}
 <div class="floatgo"><a class="btn p" id="go-float" href="${origOf(x)}" rel="nofollow noreferrer" target="_blank">원문 공고 보기 · ${ddTxt(d)}</a></div>
 <script>if(/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)){for(const a of [document.getElementById('go-orig'),document.getElementById('go-float')])a.href=document.getElementById('go-orig').dataset.m;}</script>
@@ -373,7 +373,7 @@ fs.writeFileSync(path.join(OUT, 'about.html'), page('소개', `<h1>몽 채용노
 fs.writeFileSync(path.join(OUT, '404.html'), page('없는 쪽', `<h1>찾는 쪽이 없어요</h1><p class="lead">마감이 지나 내려간 공고일 수 있어요.</p><p><a class="btn p" href="/index.html">이번 주 마감 공고 보기</a></p>`, { noindex: true }));
 
 // 🔎 검색 엔진용 (sitemap = 검색에 보일 쪽만 · noindex 쪽은 뺌) · SITE_URL = 올릴 주소 (도메인 사면 바꿈)
-const BASE = (process.env.SITE_URL || 'https://mong122.github.io').replace(/\/$/, '');
+const BASE = (process.env.SITE_URL || 'https://mongnote.com').replace(/\/$/, '');
 const indexable = [];
 for (const rel of ['index.html', 'jobs.html', 'about.html', 'calc.html', 'pay-rank.html', 'benefits.html', 'guides.html', 'lh.html', 'rates.html', ...(fs.existsSync(path.join(OUT, 'guide')) ? fs.readdirSync(path.join(OUT, 'guide')).map((f) => 'guide/' + f) : []), ...fs.readdirSync(path.join(OUT, 'job')).map((f) => 'job/' + f), ...fs.readdirSync(path.join(OUT, 'org')).map((f) => 'org/' + f)]) {
   if (!fs.existsSync(path.join(OUT, rel))) continue;
