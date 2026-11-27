@@ -128,6 +128,7 @@ th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);font
 .sorts{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;align-items:center;gap:4px;background:#eef2fb;border-radius:999px;padding:4px;width:max-content;max-width:100%;margin:4px 0 14px}.sorts button{flex:none;font:inherit;font-size:13.5px;font-weight:600;border:0;background:transparent;color:var(--sub);padding:7px 14px;border-radius:999px;cursor:pointer}.sorts button.on{background:var(--accent);color:#fff}.sorts .reset{font-size:13px;color:var(--sub);padding:0 10px;cursor:pointer;text-decoration:underline}
 .herosearch{display:flex;gap:8px;margin-top:16px}.herosearch input{flex:1;font:inherit;font-size:15px;padding:11px 14px;border-radius:12px;border:0}.herosearch button{font:inherit;font-weight:700;padding:0 18px;border-radius:12px;border:0;background:#0f2f8f;color:#fff;cursor:pointer}
 .rank th,.rank td{width:auto;padding:10px 12px;background:none}.rank tr:first-child th{background:#fafbfc}.rank td:first-child{width:44px;color:var(--sub);text-align:center}.rank .yr{display:block;font-size:12px;color:var(--sub)}
+.rank.olist td:first-child{width:auto;text-align:left;color:inherit}.rank.olist th:not(:first-child),.rank.olist td:not(:first-child){width:1%;white-space:nowrap;text-align:right}
 @media(max-width:600px){.rank .now{display:none}.rank .yr{display:none}}
 .card .star.mini{position:absolute;top:14px;right:14px;z-index:2;border:0;background:none;font-size:20px;line-height:1;color:#c3c9d4;cursor:pointer;padding:4px}.card .star.mini.on{color:#f5a524}.card .org-name{padding-right:28px}
 .btn.star{cursor:pointer;font:inherit;font-weight:700}.btn.star.on{background:#fff7e6;border-color:#f6d9a8;color:#b45309}
@@ -349,12 +350,12 @@ fs.writeFileSync(path.join(OUT, 'pay-rank.html'), page('공공기관 신입 초�
   const W = Object.keys(ORGW).sort((a, b) => (orgs[b] || []).length - (orgs[a] || []).length);
   const all = Object.keys(orgs).sort((a, b) => orgs[b].length - orgs[a].length || a.localeCompare(b, 'ko'));
   const wCard = (k) => `<a class="card" href="org/${slug(k)}.html" style="min-height:0"><span class="org-name" style="white-space:normal">${esc(k)}</span><span class="sub">${esc(ORGW[k].desc || '')}</span><span class="foot"><span class="open">지금 공고 ${(orgs[k] || []).length}건${entryBy[k] ? ' · 초임 약 ' + man(entryBy[k].total) : ''}</span><span class="go">읽기 →</span></span></a>`;
-  const row = (k) => `<tr data-q="${esc(k.toLowerCase())}"><td><a href="org/${slug(k)}.html" style="text-decoration:underline">${esc(k)}</a>${ORGW[k] ? ' <span class="note">정리 글</span>' : ''}</td><td>${orgs[k].length}건</td><td style="white-space:nowrap">${entryBy[k] ? '약 ' + man(entryBy[k].total) : '-'}</td></tr>`;
+  const row = (k) => `<tr data-q="${esc(k.toLowerCase())}"><td><a href="org/${slug(k)}.html" style="text-decoration:underline">${esc(k)}</a>${ORGW[k] ? ' <span class="note">정리 글</span>' : ''}</td><td>${orgs[k].length}건</td><td>${entryBy[k] ? '약 ' + man(entryBy[k].total) : '-'}</td></tr>`;
   fs.writeFileSync(path.join(OUT, 'orgs.html'), page('기관 정보 — 공공기관 채용 전형·필기·초임', `<h1>기관 정보</h1><p class="lead">공공기관마다 어떻게 뽑는지, 필기는 무엇을 보는지, 신입 초임은 얼마인지 정리했어요. 정리 글 아래에는 그 기관의 지금 공고가 저절로 붙어요.</p>
 <p class="btns"><a class="btn p" href="pay-rank.html">공공기관 신입 초임 순위</a></p>
 ${W.length ? `<h2>정리한 기관</h2><div class="grid">${W.map(wCard).join('')}</div>` : ''}
 <h2>공고 낸 기관 전체 (${all.length}곳)</h2><div class="filters"><input id="oq" placeholder="기관 찾기" style="flex:1 1 220px"></div>
-<table id="ot" class="rank"><tr><th>기관</th><th>지금 공고</th><th>신입 초임</th></tr>${all.map(row).join('')}</table>
+<table id="ot" class="rank olist"><tr><th>기관</th><th>지금 공고</th><th>신입 초임</th></tr>${all.map(row).join('')}</table>
 <script>oq.oninput=()=>{const q=oq.value.trim().toLowerCase();for(const r of ot.querySelectorAll('tr[data-q]'))r.hidden=q&&!r.dataset.q.includes(q)}</script>`, { on: 'orgs', desc: '공공기관 채용 전형·필기시험·신입 초임 정리와 기관별 지금 공고' }));
   console.log(`  🏢 기관 정보: 정리 글 ${W.length} · 공고 낸 기관 ${all.length}`);
 }
