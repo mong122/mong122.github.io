@@ -5,18 +5,17 @@
   const fl10 = (v) => Math.floor(Math.round(v) / 10) * 10; // 11/27 하루: 2,800,000×0.009 = 25,199.99… 로 10원 덜 나오던 것
   const won = (v) => Math.round(v).toLocaleString('ko-KR') + '원';
   const num = (el) => +String(el.value).replace(/[^\d.]/g, '') || 0;
+  // 소득세 = 국세청 간이세액표 (천 원 구간) · 1천만 원 넘으면 표 아래 계산식 · 8~20세 자녀 공제 (국세청 안내 화면 금액)
   function incomeTax(base, fam, kids) {
     if (!TAX) return null;
     const k = base / 1000;
     const f = Math.min(Math.max(fam, 1), 11);
-    let t = null;
-    const r = TAX.rows.find((x) => k >= x[0] && k < x[1]);
-    if (r) t = r[2][f - 1];
-    else if (k < TAX.rows[0][0]) t = 0;
-    else if (typeof window.TAX_OVER === 'function') t = window.TAX_OVER(base, f);
-    if (t == null) return null;
-    if (typeof window.TAX_KIDS === 'function') t = Math.max(0, t - window.TAX_KIDS(kids));
-    return t;
+    let t;
+    if (k < TAX.rows[0][0]) t = 0;
+    else if (base <= 10000000) { const r = TAX.rows.find((x) => k >= x[0] && k < x[1]); t = r ? r[2][f - 1] : TAX.t10[f - 1]; }
+    else { const o = TAX.over.find((x) => base > x[0] && base <= x[1]); t = TAX.t10[f - 1] + o[2] + Math.floor((base - o[5]) * o[4] * o[3]); }
+    const kd = kids <= 0 ? 0 : kids === 1 ? TAX.kids[0] : kids === 2 ? TAX.kids[1] : TAX.kids[1] + (kids - 2) * TAX.kids[2];
+    return Math.max(0, Math.floor((t - kd) / 10) * 10);
   }
   function run() {
     const y = num($('cy')) * 1e4, nt = num($('cn')) * 1e4, fam = +$('cf').value, kids = +$('ck').value;
