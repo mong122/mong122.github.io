@@ -33,7 +33,7 @@ const items = [
   ...pool('alio').map((x) => ({ ...x, src: 'alio', n: x.n || x.nope || 0 })),
   ...pool('gojobs').map((x) => ({ ...x, src: 'gojobs', start: x.start || x.posted || '', n: +x.nope || 0, url: x.url })),
   ...pool('cleaneye').map((x) => ({ ...x, src: 'cleaneye', n: +x.nope || 0, region: arr(x.region).map((r) => String(r).replace(/특별자치시|특별자치도|특별시|광역시|도$/g, '').replace(/^(충청|전라|경상)(남|북)$/, (m, a, b) => ({ 충청: '충', 전라: '전', 경상: '경' })[a] + b)) })),
-  ...pool('w24').filter((x) => /대기업|중견|외국계/.test(x.se || '')).map((x) => ({ ...x, src: 'w24', n: +x.nope || 0, hire: arr(x.hire).map((h) => String(h).replace(/|/g, '·')) })), // 공기업·공공기관은 잡알리오와 겹쳐서 뺌
+  ...pool('w24').filter((x) => /대기업|중견|외국계/.test(x.se || '')).map((x) => ({ ...x, src: 'w24', n: +x.nope || 0, hire: arr(x.hire).flatMap((h) => String(h).split(/[|·,]/)).map((h) => h.trim()).filter(Boolean) })), // 공기업·공공기관은 잡알리오와 겹쳐서 뺌
 ]; // 인원 칸 = nope (11/27 하루: 많이 뽑는 순이 안 됨)
 const blog = {}; // 공고 번호 → MONG 글
 for (const j of st.deskJobs || []) {
@@ -50,6 +50,8 @@ if (fs.existsSync(ENTRY_F)) for (const [k, v] of Object.entries(JSON.parse(fs.re
 
 const kindOf = (x) => { const h = arr(x.hire).join(' '); return /비정규/.test(h) ? '비정규직' : /무기계약/.test(h) ? '무기계약직' : /인턴/.test(h) ? '청년인턴' : /정규직/.test(h) ? '정규직' : h || '-'; };
 const isDoctor = (x) => /의사\(|의사직|별정직 의사|전문의/.test(x.title) || (/전공의|레지던트|전임의|진료|(?:병원|의료원).*인턴|^\s*\S*\s*인턴 모집|치과 인턴/.test(`${x.inst} ${x.title}`) && /병원|의료원/.test(`${x.inst} ${x.title}`) && !/체험형|청년|행정|사무/.test(x.title));
+// 고르기 칸 4가지로 묶기 (카드 글자는 그대로) — 기간제·계약직 등은 비정규직 (11/27 대기업·중견 고르기가 0건이던 것)
+const kindGroup = (x) => { const k = kindOf(x); return /^(정규직|무기계약직|비정규직|청년인턴)$/.test(k) ? k : /기간제|계약직|시간제|파견|대체|촉탁|비상임/.test(k) ? '비정규직' : k; };
 const isPermFresh = (x) => kindOf(x) === '정규직' && (x.se || '') === '신입' && !isDoctor(x) && !/박사|연구책임|연구위원|보훈|수련의|특별채용|경력/.test(x.title); // 11/27 의사 인턴·레지던트는 첫 화면에서 뺌
 const regionOf = (x) => arr(x.region).join('·') || '-';
 const man = (n) => `${Number(n).toLocaleString('ko-KR')}만 원`;
@@ -156,7 +158,7 @@ const page = (title, body, { depth = 0, on = '', desc = '', noindex = false } = 
 <main class="wrap">${body}</main><script src="${up}site.js?v=${BUILD}"></script>
 <footer class="wrap">공고 정보는 잡알리오(공공기관 채용정보시스템) 자료예요. 지원 전에 꼭 원문 공고를 확인하세요. · <a href="${up}about.html" style="text-decoration:underline">소개</a> · <a href="${up}privacy.html" style="text-decoration:underline">개인정보처리방침</a> · ${today} 기준</footer></body></html>`;
 };
-const regionShort = (x) => { const r = arr(x.region); return r.length > 1 ? `${r[0]} 외 ${r.length - 1}곳` : r[0] || '지역 미정'; };
+const regionShort = (x) => { const r = arr(x.region); return r.length > 1 ? `${r[0]} 외 ${r.length - 1}곳` : r[0] || (x.src === 'w24' ? '' : '지역 미정'); };
 const titleShort = (x) => { let t = titleClean(x.title).replace(/^㈜\s*/, '').replace(/^\(주\)\s*/, ''); for (const k of [x.inst, x.inst.replace(/\(주\)|\(재\)/g, '').trim()]) if (k && t.startsWith(k)) { t = t.slice(k.length).replace(/^(\s|\(주\))+/, ''); break; } return t || titleClean(x.title); };
 const ddTxt = (d) => (d > 400 ? '상시 채용' : d === 0 ? '오늘 마감' : `D-${d}`);
 // 카드 = 늘 같은 다섯 줄 (11/27 사장님 "눈으로 보기에 일관성이 없어") — 기관·마감 / 제목 두 줄 / 고용·경력·인원·지역 한 줄 / 초봉 (없으면 회색 한 줄)
@@ -172,7 +174,7 @@ const card = (x, up = '') => {
   const chips = [
     `<span class="c c-kind">${esc(kindOf(x))}</span>`,
     x.se ? `<span class="c ${x.src === 'alio' ? 'c-se' : ''}">${esc(x.se)}</span>` : '',
-    `<span class="c c-rg">${esc(regionShort(x))}</span>`,
+    regionShort(x) ? `<span class="c c-rg">${esc(regionShort(x))}</span>` : '',
     x.n >= 10 ? `<span class="c c-big">${x.n}명 채용</span>` : x.n ? `<span class="c">${x.n}명</span>` : '',
     many > 1 ? `<a class="c c-more" href="${up}org/${slug(x.inst)}.html">이 기관 공고 ${many}건 ›</a>` : '',
   ].join('');
@@ -225,13 +227,13 @@ fs.writeFileSync(path.join(OUT, 'index.html'), page('공공기관 채용 이번 
 const regions = [...new Set(items.flatMap((x) => arr(x.region)))].sort();
 fs.writeFileSync(path.join(OUT, 'jobs.html'), page('공공기관 채용 전체 공고', `
 <h1>전체 공고</h1>
-<div class="srctabs"><button data-src="" class="on">전체 <small>${items.length}</small></button>${Object.entries(SRC).filter(([k]) => items.some((x) => x.src === k)).map(([k, v]) => `<button data-src="${k}">${v} <small>${items.filter((x) => x.src === k).length}</small></button>`).join('')}</div><p class="lead">지원할 수 있는 공공기관 공고 <b id="cnt">${items.length}</b>건 · 고르고 줄 세워 보세요.</p>
+<div class="srctabs"><button data-src="" class="on">전체 <small>${items.length}</small></button>${Object.entries(SRC).filter(([k]) => items.some((x) => x.src === k)).map(([k, v]) => `<button data-src="${k}">${v} <small>${items.filter((x) => x.src === k).length}</small></button>`).join('')}</div><p class="lead">지원할 수 있는 공고 <b id="cnt">${items.length}</b>건 · 고르고 줄 세워 보세요.</p>
 <div class="filters"><input id="fq" placeholder="기관·직무 찾기" style="flex:1 1 220px"><select id="fr"><option value="">모든 지역</option>${regions.map((r) => `<option>${esc(r)}</option>`).join('')}</select>
 <select id="fk"><option value="">모든 고용 형태</option><option>정규직</option><option>무기계약직</option><option>비정규직</option><option>청년인턴</option></select>
 <select id="fs"><option value="">신입·경력 모두</option><option value="신입">신입 받는 곳</option></select>
 <select id="fe"><option value="">학력 모두</option><option value="학력무관">학력 무관</option><option value="고졸">고졸 가능</option></select></div>
 <div class="sorts"><button data-s="end" class="on">마감 임박순</button><button data-s="new">새로 올라온 순</button><button data-s="pay">초임 높은 순</button><button data-s="n">많이 뽑는 순</button><span class="reset" id="rs">거르기 처음으로</span></div>
-<div class="grid" id="list">${byEnd.map((x) => card(x).replace('<div class="card"', `<div class="card" data-src="${x.src}" data-r="${esc(arr(x.region).join(' '))}" data-k="${esc(kindOf(x))}" data-s="${esc(x.se || '')}" data-e="${esc(x.acbg || '')}" data-end="${x.end}" data-new="${x.start || ''}" data-pay="${payOk(x) ? (entryBy[x.inst] || {}).total || 0 : 0}" data-n="${x.n || 0}" data-q="${esc((x.inst + ' ' + x.title + ' ' + (x.ncs || '')).toLowerCase())}"`)).join('')}</div>
+<div class="grid" id="list">${byEnd.map((x) => card(x).replace('<div class="card"', `<div class="card" data-src="${x.src}" data-r="${esc(arr(x.region).join(' '))}" data-k="${esc(kindGroup(x))}" data-s="${esc(x.se || '')}" data-e="${esc(x.acbg || '')}" data-end="${x.end}" data-new="${x.start || ''}" data-pay="${payOk(x) ? (entryBy[x.inst] || {}).total || 0 : 0}" data-n="${x.n || 0}" data-q="${esc((x.inst + ' ' + x.title + ' ' + (x.ncs || '')).toLowerCase())}"`)).join('')}</div>
 <p class="note" id="empty" hidden>맞는 공고가 없어요. 거르기를 줄여 보세요.</p>
 <script>
 const L=document.getElementById('list'),cards=[...L.children];
