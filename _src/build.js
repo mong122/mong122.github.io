@@ -324,7 +324,7 @@ for (const inst of new Set([...Object.keys(orgs), ...Object.keys(ORGW)])) {
   const rk = rankOf(inst);
   const past = (st.deskJobs || []).filter((j) => j.hireItem && j.hireItem.inst === inst && j.published && j.published.url);
   const payBox = e ? `<h2>신입 초임 (알리오 경영공시)</h2><table><tr><th>${esc(e.year || '')} 합계</th><td><b>약 ${man(e.total)}</b>${rk ? ` <span class="note">· 이 사이트 공공기관 ${payRank.length}곳 가운데 ${rk}위 (<a href="../pay-rank.html" style="text-decoration:underline">순위 보기</a>)</span>` : ''}</td></tr>${arr(e.parts).map((p) => { const m = String(p).match(/^(.*?)\s+([\d,]+)만$/); return m ? `<tr><th>${esc(m[1])}</th><td>${m[2]}만 원</td></tr>` : ''; }).join('')}${e.budget ? `<tr><th>${esc(e.budgetYear)} (예산)</th><td>약 ${man(e.budget)}</td></tr>` : ''}</table><p class="note">대졸·사무직·무경력 신입 기준 공시예요. 뽑는 직무·직급에 따라 실제 급여는 다를 수 있어요. <a href="../calc.html?y=${e.total}" style="text-decoration:underline">이 초임으로 실수령 계산해 보기</a></p>` : '';
-  fs.writeFileSync(path.join(OUT, 'org', slug(inst) + '.html'), page(`${inst} 채용`, `
+  fs.writeFileSync(path.join(OUT, 'org', slug(inst) + '.html'), page(w ? w.title : `${inst} 채용`, `
 <div class="crumb"><a href="../index.html">처음</a> › <a href="../orgs.html">기관 정보</a> › ${esc(inst)}</div>
 <h1>${esc(w ? w.title : inst + ' 채용')}</h1><p class="lead">${w ? esc(w.desc || '') + '<br>' : ''}지금 받는 공고 ${list.length}건${e ? ` · 신입 초임 약 ${man(e.total)}` : ''}</p>
 ${list.length ? `<p class="btns"><a class="btn p" href="#now">지금 받는 공고 ${list.length}건 보기</a></p>` : ''}
