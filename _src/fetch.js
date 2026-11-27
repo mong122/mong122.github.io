@@ -120,6 +120,30 @@ async function lh() {
   return all.filter((x) => x.PAN_ID && !seen.has(x.PAN_ID) && seen.add(x.PAN_ID)).map((x) => ({ id: x.PAN_ID, title: x.PAN_NM || '', inst: x.CNP_CD_NM || x.AIS_TP_CD_NM || '', end: toIso(x.CLSG_DT), url: x.DTL_URL || x.DTL_URL_MOB || '', type: x.AIS_TP_CD_NM || '', upp: x.UPP_AIS_TP_NM || '', region: x.CNP_CD_NM || '', start: toIso(x.PAN_NT_ST_DT), state: x.PAN_SS || '' }));
 }
 
+// 💹 예적금 금리 (금감원 금융상품 한눈에 — 은행·저축은행 예금·적금) · 키 = FINLIFE_KEY (깃허브 Secrets) (11/27)
+const FIN = (process.env.FINLIFE_KEY || '').trim();
+async function rates() {
+  const out = [];
+  for (const [kind, api] of [['예금', 'depositProductsSearch'], ['적금', 'savingProductsSearch']]) {
+    for (const grp of ['020000', '030300']) {
+      for (let page = 1; page <= 5; page++) {
+        const u = new URL(`https://finlife.fss.or.kr/finlifeapi/${api}.json`);
+        for (const [k, v] of Object.entries({ auth: FIN, topFinGrpNo: grp, pageNo: String(page) })) u.searchParams.set(k, v);
+        const r = JSON.parse(await get(u)).result || {};
+        if (r.err_cd && r.err_cd !== '000') throw new Error('금감원: ' + (r.err_msg || r.err_cd));
+        const opt = {};
+        for (const o of r.optionList || []) (opt[`${o.fin_co_no}|${o.fin_prdt_cd}`] = opt[`${o.fin_co_no}|${o.fin_prdt_cd}`] || []).push({ trm: +o.save_trm, type: o.intr_rate_type_nm || '', rsrv: o.rsrv_type_nm || '', rate: +o.intr_rate || 0, rate2: +o.intr_rate2 || 0 });
+        for (const b of r.baseList || []) {
+          const id = `${b.fin_co_no}|${b.fin_prdt_cd}`;
+          out.push({ id: kind + '|' + id, kind, grp: grp === '020000' ? '은행' : '저축은행', bank: b.kor_co_nm || '', name: b.fin_prdt_nm || '', way: b.join_way || '', who: String(b.join_member || '').slice(0, 80), cond: String(b.spcl_cnd || '').replace(/\s+/g, ' ').slice(0, 200), max: b.max_limit || '', month: b.dcls_month || '', opts: opt[id] || [] });
+        }
+        if (+r.now_page_no >= +r.max_page_no || !(r.baseList || []).length) break;
+      }
+    }
+  }
+  return out;
+}
+
 // 🎁 정부24 공공서비스(보조금24) 전체 — 지원금 허브 (11/27) · 같은 공공데이터 키 · 1,000개씩
 async function gov24() {
   const all = [];
@@ -141,7 +165,7 @@ async function gov24() {
 }
 
 (async () => {
-  const jobs = [['alio', alio, GOV], ['gojobs', gojobs, GOV], ['cleaneye', cleaneye, GOV], ['w24', w24, W24], ['gov24', gov24, GOV], ['lh', lh, GOV]];
+  const jobs = [['alio', alio, GOV], ['gojobs', gojobs, GOV], ['cleaneye', cleaneye, GOV], ['w24', w24, W24], ['gov24', gov24, GOV], ['lh', lh, GOV], ['rates', rates, FIN]];
   let fail = 0;
   for (const [k, fn, key] of jobs) {
     if (!key) { console.log(`- ${k}: 키 없음 → 전에 받은 자료 그대로`); continue; }

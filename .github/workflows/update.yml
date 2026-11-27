@@ -31,6 +31,7 @@ jobs:
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
           WORK24_KEY: ${{ secrets.WORK24_KEY }}
+          FINLIFE_KEY: ${{ secrets.FINLIFE_KEY }}
         run: node _src/fetch.js
       - name: 알리오 초임 (7일 지난 기관만)
         run: node _src/entry.js || true
