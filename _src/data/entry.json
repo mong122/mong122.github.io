@@ -1715,5 +1715,33 @@
   "budget": 4426,
   "url": "https://alio.go.kr/item/itemReportTerm.do?apbaId=C0357&reportFormRootNo=2060",
   "at": 1795763119887
+ },
+ "한국체육산업개발(주)": {
+  "year": "2025년 결산",
+  "total": 4179,
+  "parts": [
+   "기본급 3,561만",
+   "실적수당 325만",
+   "급여성 복리후생비 70만",
+   "성과상여금 223만"
+  ],
+  "budgetYear": "2026년 예산",
+  "budget": 4254,
+  "url": "https://alio.go.kr/item/itemReportTerm.do?apbaId=C0280&reportFormRootNo=2060",
+  "at": 1795848952085
+ },
+ "예금보험공사": {
+  "year": "2025년 결산",
+  "total": 5131,
+  "parts": [
+   "기본급 3,149만",
+   "고정수당 1,181만",
+   "실적수당 27만",
+   "성과상여금 774만"
+  ],
+  "budgetYear": "2026년 예산",
+  "budget": 5206,
+  "url": "https://alio.go.kr/item/itemReportTerm.do?apbaId=C0101&reportFormRootNo=2060",
+  "at": 1795848954057
  }
 }
