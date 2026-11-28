@@ -164,8 +164,38 @@ async function gov24() {
   })).filter((x) => x.id && x.name);
 }
 
+// 🏠 청약홈 (한국부동산원 분양정보 — 공공데이터 키, 11/28 사장님 "청약홈부터") · 민간 아파트 분양 · 오피스텔·도시형·민간임대 · 공공지원 민간임대 · 무순위
+async function applyhome() {
+  const since = new Date(Date.now() + 9 * 3600e3 - 75 * 864e5).toISOString().slice(0, 10);
+  const KINDS = [['아파트 분양', 'getAPTLttotPblancDetail'], ['오피스텔·민간임대', 'getUrbtyOfctlLttotPblancDetail'], ['공공지원 민간임대', 'getPblPvtRentLttotPblancDetail'], ['무순위·잔여', 'getRemndrLttotPblancDetail']];
+  const out = []; let ok = 0;
+  for (const [kind, api] of KINDS) {
+    try {
+      for (let page = 1; page <= 10; page++) {
+        const u = new URL('https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/' + api);
+        for (const [k, v] of Object.entries({ page: String(page), perPage: '500', serviceKey: GOV, 'cond[RCRIT_PBLANC_DE::GTE]': since })) u.searchParams.set(k, v);
+        const t = await get(u);
+        if (t.trim().startsWith('<')) throw new Error(authErr(t) || t.slice(0, 120));
+        const j = JSON.parse(t);
+        const rows = j.data || [];
+        if (page === 1) console.log(`  청약홈 ${kind}: ${j.totalCount ?? rows.length}건 · 칸 ${Object.keys(rows[0] || {}).slice(0, 40).join(',')}`);
+        for (const x of rows) {
+          const end = toIso(x.RCEPT_ENDDE || x.SUBSCRPT_RCEPT_ENDDE || x.GNRL_RCEPT_ENDDE || x.SPSPLY_RCEPT_ENDDE || '');
+          const start = toIso(x.RCEPT_BGNDE || x.SUBSCRPT_RCEPT_BGNDE || x.GNRL_RCEPT_BGNDE || x.SPSPLY_RCEPT_BGNDE || '');
+          out.push({ id: 'ah' + (x.HOUSE_MANAGE_NO || '') + '-' + (x.PBLANC_NO || ''), kind, title: String(x.HOUSE_NM || '').trim(), type: x.HOUSE_DTL_SECD_NM || x.HOUSE_SECD_NM || kind, region: x.SUBSCRPT_AREA_CODE_NM || String(x.HSSPLY_ADRES || '').split(' ')[0] || '', addr: String(x.HSSPLY_ADRES || '').slice(0, 80), n: Number(x.TOT_SUPLY_HSHLDCO) || 0, by: String(x.BSNS_MBY_NM || x.CNSTRCT_ENTRPS_NM || '').slice(0, 40), notice: toIso(x.RCRIT_PBLANC_DE || ''), start, end, win: toIso(x.PRZWNER_PRESNATN_DE || ''), url: x.PBLANC_URL || x.HMPG_ADRES || '' });
+        }
+        if (rows.length < 500) break;
+      }
+      ok++;
+    } catch (e) { console.log(`  ✘ 청약홈 ${kind}: ${e.message}`); }
+  }
+  if (!ok) throw new Error('청약홈: 네 창구 다 못 받음 (공공데이터포털에서 "청약홈 분양정보 조회 서비스" 사용 신청이 됐나)');
+  const seen = new Set();
+  return out.filter((x) => x.title && x.end && !seen.has(x.id) && seen.add(x.id));
+}
+
 (async () => {
-  const jobs = [['alio', alio, GOV], ['gojobs', gojobs, GOV], ['cleaneye', cleaneye, GOV], ['w24', w24, W24], ['gov24', gov24, GOV], ['lh', lh, GOV], ['rates', rates, FIN]];
+  const jobs = [['alio', alio, GOV], ['gojobs', gojobs, GOV], ['cleaneye', cleaneye, GOV], ['w24', w24, W24], ['gov24', gov24, GOV], ['lh', lh, GOV], ['applyhome', applyhome, GOV], ['rates', rates, FIN]];
   let fail = 0;
   for (const [k, fn, key] of jobs) {
     if (!key) { console.log(`- ${k}: 키 없음 → 전에 받은 자료 그대로`); continue; }
