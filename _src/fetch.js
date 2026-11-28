@@ -164,10 +164,10 @@ async function gov24() {
   })).filter((x) => x.id && x.name);
 }
 
-// 🏠 청약홈 (한국부동산원 분양정보 — 공공데이터 키, 11/28 사장님 "청약홈부터") · 민간 아파트 분양 · 오피스텔·도시형·민간임대 · 공공지원 민간임대 · 무순위
+// 🏠 청약홈 (한국부동산원 분양정보 — 공공데이터 키, 11/28 사장님 "청약홈부터") · 아파트 분양 · 오피스텔·도시형·민간임대·공공지원 민간임대 (한 창구, 주택구분으로 나뉨) · 무순위·잔여 — 창구 이름은 data.go.kr 15098547 쪽으로 확인
 async function applyhome() {
   const since = new Date(Date.now() + 9 * 3600e3 - 75 * 864e5).toISOString().slice(0, 10);
-  const KINDS = [['아파트 분양', 'getAPTLttotPblancDetail'], ['오피스텔·민간임대', 'getUrbtyOfctlLttotPblancDetail'], ['공공지원 민간임대', 'getPblPvtRentLttotPblancDetail'], ['무순위·잔여', 'getRemndrLttotPblancDetail']];
+  const KINDS = [['아파트 분양', 'getAPTLttotPblancDetail'], ['오피스텔·도시형·민간임대', 'getUrbtyOfctlLttotPblancDetail'], ['무순위·잔여', 'getRemndrLttotPblancDetail']];
   const out = []; let ok = 0;
   for (const [kind, api] of KINDS) {
     try {
@@ -189,7 +189,7 @@ async function applyhome() {
       ok++;
     } catch (e) { console.log(`  ✘ 청약홈 ${kind}: ${e.message}`); }
   }
-  if (!ok) throw new Error('청약홈: 네 창구 다 못 받음 (공공데이터포털에서 "청약홈 분양정보 조회 서비스" 사용 신청이 됐나)');
+  if (!ok) throw new Error('청약홈: 세 창구 다 못 받음 (공공데이터포털에서 "청약홈 분양정보 조회 서비스" 사용 신청이 됐나)');
   const seen = new Set();
   return out.filter((x) => x.title && x.end && !seen.has(x.id) && seen.add(x.id));
 }
