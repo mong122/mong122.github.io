@@ -97,7 +97,7 @@ a{color:inherit;text-decoration:none}
 header.top{background:var(--navy);color:#fff;position:sticky;top:0;z-index:5}.strip{background:var(--week);color:#fff;font-size:13.5px;font-weight:600}.strip .wrap{padding-top:7px;padding-bottom:7px}.strip a{color:#fff;text-decoration:underline}
 header.top .wrap{display:flex;align-items:center;gap:18px;height:58px}
 .logo{font-weight:800;font-size:20px;letter-spacing:-.02em;white-space:nowrap;color:#fff}.logo b{color:#5fd3c9}
-nav{display:flex;overflow-x:auto;white-space:nowrap;scrollbar-width:none}nav a{font-size:15px;color:#b9c3d3;margin-right:14px}nav a:hover,nav a.on{color:#fff}nav a.on{font-weight:700}
+nav{display:flex;overflow-x:auto;white-space:nowrap;scrollbar-width:none}nav{align-items:center;gap:2px}nav a{font-size:15px;color:#c3ccda;margin:0;padding:6px 13px;border-radius:7px;position:relative}nav a+a::before{content:"";position:absolute;left:-1px;top:50%;height:14px;margin-top:-7px;border-left:1px solid rgba(255,255,255,.18)}nav a:hover{color:#fff;background:rgba(255,255,255,.08)}nav a.on{color:#fff;font-weight:700;background:rgba(255,255,255,.14)}nav a.on::before,nav a.on+a::before,nav a:hover::before,nav a:hover+a::before{border-left-color:transparent}
 h1{font-size:26px;letter-spacing:-.03em;margin:28px 0 6px}h2{font-size:19px;letter-spacing:-.02em;margin:34px 0 12px;border-left:4px solid var(--gold);padding-left:10px;line-height:1.3}
 .lead{color:var(--sub);margin:0 0 8px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
@@ -148,7 +148,7 @@ article.guide{font-size:16.5px;line-height:1.8}article.guide h2{margin-top:30px}
 footer{margin:50px 0 30px;font-size:13px;color:var(--sub);border-top:1px solid var(--line);padding-top:18px}
 .crumb{font-size:13px;color:var(--sub);margin-top:20px}.crumb a{text-decoration:underline}
 .blogline{margin-bottom:8px}.blogline a{color:var(--accent);text-decoration:underline}
-@media(max-width:600px){.hero h1{font-size:24px}.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid #d9d5cc}h1{font-size:22px}header.top .wrap{height:auto;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 18px}nav a{margin-right:14px;font-size:14px}th{width:34%}.hero{padding:22px 18px}.stat{min-width:0;flex:1 1 40%}}
+@media(max-width:600px){.hero h1{font-size:24px}.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid #d9d5cc}h1{font-size:22px}header.top .wrap{height:auto;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 18px}nav a{font-size:14px;padding:5px 10px}th{width:34%}.hero{padding:22px 18px}.stat{min-width:0;flex:1 1 40%}}
 `;
 const STRIP = (up) => { const t = items.filter((x) => dleft(x.end) === 0).length, w = items.filter((x) => dleft(x.end) >= 0 && dleft(x.end) <= 7).length; return `<div class="strip"><div class="wrap">${t ? `오늘 마감 ${t}건 · ` : ""}7일 안 마감 <a href="${up}index.html#soon">${w}건</a></div></div>`; }; // 11/28 하루 디자인 — 주황 마감 띠
 const page = (title, body, { depth = 0, on = '', desc = '', noindex = false } = {}) => {
