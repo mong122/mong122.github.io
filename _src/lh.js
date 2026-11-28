@@ -8,7 +8,8 @@ module.exports = function lh({ fs, path, OUT, DATA, page, esc, dleft, md }) {
   if (!all.length) { console.log('  🏠 청약·임대: 자료 없음'); return 0; }
   const SRCS = [...new Set(all.map((x) => x.src))];
   all.sort((a, b) => a.end.localeCompare(b.end));
-  const tab = (x) => { const t = x.src === '청약홈' ? String(x.type || x.upp) : `${x.upp} ${x.type}`; // 청약홈은 주택 구분만 봄 (창구 이름 "오피스텔·도시형·민간임대" 에 임대가 있어 오피스텔 분양이 임대로 가던 것) return /토지|상가/.test(t) ? '토지·상가' : /신혼/.test(t) ? '신혼희망' : /임대/.test(t) ? '임대' : /분양|무순위|잔여|오피스텔|도시형|아파트/.test(t) ? '분양' : '임대'; }; // 11/28 사장님 "토지랑 상가도 넣어"
+  // 청약홈은 주택 구분만 봄 (창구 이름 "오피스텔·도시형·민간임대" 에 임대가 있어 오피스텔 분양이 임대로 가던 것, 11/28)
+  const tab = (x) => { const t = x.src === '청약홈' ? String(x.type || x.upp) : `${x.upp} ${x.type}`; return /토지|상가/.test(t) ? '토지·상가' : /신혼/.test(t) ? '신혼희망' : /임대/.test(t) ? '임대' : /분양|무순위|잔여|오피스텔|도시형|아파트/.test(t) ? '분양' : '임대'; }; // 11/28 사장님 "토지랑 상가도 넣어"
   const T = ['임대', '분양', '신혼희망', '토지·상가'].filter((t) => all.some((x) => tab(x) === t));
   const SH = { 경상남도: '경남', 경상북도: '경북', 전라남도: '전남', 전라북도: '전북', 충청남도: '충남', 충청북도: '충북', 경기도: '경기', 강원도: '강원' };
   const short = (r) => String(r || '').split(/\s+/).map((w) => SH[w] || w.replace(/특별자치시|특별자치도|통합특별시|특별시|광역시/g, '')).join(' ');
