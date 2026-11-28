@@ -43,16 +43,16 @@ module.exports = function guides({ fs, path, OUT, page, esc, ROOT }) {
     const sources = (meta.sources || '').split(/\s*,\s*/).filter(Boolean);
     list.push({ slug, ...meta });
     fs.writeFileSync(path.join(OUT, 'guide', slug + '.html'), page(meta.title, `
-<div class="crumb"><a href="../index.html">처음</a> › <a href="../guides.html">가이드</a> › ${esc(meta.cat || '')}</div>
+<div class="crumb"><a href="../index.html">처음</a> › <a href="../guides.html">제도 안내</a> › ${esc(meta.cat || '')}</div>
 <h1>${esc(meta.title)}</h1><p class="lead">${esc(meta.desc || '')}</p><p class="note">${esc(meta.date || '')}</p>
 <article class="guide">${md(m[2])}</article>
 ${sources.length ? `<h2>출처</h2><div class="box" style="white-space:normal">${sources.map((u) => `<div>· <a href="${esc(u)}" rel="nofollow noreferrer" target="_blank" style="text-decoration:underline">${esc(u.replace(/^https?:\/\//, '').slice(0, 70))}</a></div>`).join('')}</div>` : ''}
 <p class="note">금액·기한은 바뀔 수 있어요. 신청 전 원문을 확인해 주세요.</p>
-<p><a class="btn" href="../guides.html">가이드 더 보기</a> <a class="btn" href="../benefits.html">지원금 찾기</a></p>`, { depth: 1, desc: meta.desc || meta.title }));
+<p><a class="btn" href="../guides.html">제도 안내 더 보기</a> <a class="btn" href="../benefits.html">지원금 찾기</a></p>`, { depth: 1, desc: meta.desc || meta.title }));
   }
   list.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
   const cats = [...new Set(list.map((x) => x.cat || '기타'))];
-  fs.writeFileSync(path.join(OUT, 'guides.html'), page('가이드 — 지원금·환급·취업 정보 정리', `<h1>가이드</h1><p class="lead">지원금·환급금·취업 정보를 공식 자료로 하나씩 정리했어요.</p>
+  fs.writeFileSync(path.join(OUT, 'guides.html'), page('제도 안내 — 지원금·환급·취업 제도 정리', `<h1>제도 안내</h1><p class="lead">지원금·환급금·취업 정보를 공식 자료로 하나씩 정리했어요.</p>
 ${list.length ? cats.map((c) => `<h2>${esc(c)}</h2><div class="grid">${list.filter((x) => (x.cat || '기타') === c).map((x) => `<a class="card" href="guide/${x.slug}.html" style="min-height:0"><span class="org-name" style="white-space:normal">${esc(x.title)}</span><span class="sub">${esc(x.desc || '')}</span><span class="foot"><span class="open">${esc(x.date || '')}</span><span class="go">읽기 →</span></span></a>`).join('')}</div>`).join('') : '<p class="note">곧 첫 글이 올라와요.</p>'}`, { on: 'guides', noindex: !list.length, desc: '지원금·환급금·취업 정보를 공식 자료로 정리한 가이드 모음' }));
   console.log(`  📘 가이드: ${list.length}편`);
   return list;
