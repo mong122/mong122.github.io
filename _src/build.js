@@ -209,6 +209,8 @@ const week = byEnd.filter((x) => dleft(x.end) <= 7);
 const fresh = items.filter((x) => x.start && dleft(x.start) >= -1 && dleft(x.start) <= 0).sort((a, b) => b.start.localeCompare(a.start));
 const pf = byEnd.filter(isPermFresh);
 const uniqOrg = (l) => { const seen = new Set(); return l.filter((x) => !seen.has(x.inst) && seen.add(x.inst)); }; // 첫 화면 칸은 기관마다 하나
+// 11/28 회의 — 블로그 '놓치면 아까운 공고' 로 온 사람이 공고를 더 보게: 공고 쪽 아래 마감 가까운 다른 기관 공고 6개
+const nearMore = (inst, up = '../') => { const l = uniqOrg(byEnd.filter((y) => y.inst !== inst && dleft(y.end) >= 1 && !isDoctor(y))).slice(0, 6); return l.length ? `<h2>놓치면 아까운 공고</h2><div class="grid">${l.map((y) => card(y, up)).join('')}</div><p class="btns"><a class="btn p" href="${up}index.html">이번 주 마감 공고 보기</a><a class="btn" href="${up}jobs.html">전체 공고 ${items.length}건</a></p>` : ''; };
 const orgs = {};
 for (const x of items) (orgs[x.inst] = orgs[x.inst] || []).push(x);
 
@@ -295,7 +297,8 @@ ${b && b.draft ? ours(b.draft) : ''}
 ${orgMore(x.inst)}
 ${sec('지원 자격', x.qual)}${sec('우대 사항', x.prefMore || x.pref)}
 ${sec('전형 절차', x.screen)}
-${others.length ? `<h2>${esc(x.inst)}의 다른 공고</h2><div class="grid">${others.slice(0, 6).map((y) => card(y, '../').replace(/<a class="c c-more"[^>]*>[^<]*<\/a>/, '')).join('')}</div>` : ''}`, { depth: 1, noindex: !((b && b.url) || NOTES[x.id]), desc: `${x.inst} ${kindOf(x)} ${x.n ? x.n + '명' : ''} 채용, ${md(x.end)} 마감. 지원 자격·전형 절차·초봉 정리.` }));
+${others.length ? `<h2>${esc(x.inst)}의 다른 공고</h2><div class="grid">${others.slice(0, 6).map((y) => card(y, '../').replace(/<a class="c c-more"[^>]*>[^<]*<\/a>/, '')).join('')}</div>` : ''}
+${nearMore(x.inst)}`, { depth: 1, noindex: !((b && b.url) || NOTES[x.id]), desc: `${x.inst} ${kindOf(x)} ${x.n ? x.n + '명' : ''} 채용, ${md(x.end)} 마감. 지원 자격·전형 절차·초봉 정리.` }));
 }
 
 // 🗄 마감된 공고 쪽 (60일)
@@ -312,6 +315,7 @@ ${others.length ? `<h2>${esc(x.inst)}의 다른 공고</h2><div class="grid">${o
 <h1>${esc(a.title)}</h1><p class="lead">${esc(a.inst)} · <b style="color:var(--warn)">${md(a.end)} 마감된 공고예요</b></p>
 <div class="keynote" style="background:#fff1ee"><b>이 공고는 접수가 끝났어요</b><div>같은 기관의 지금 받는 공고나 비슷한 공고를 아래에서 보세요.</div></div>
 ${same.length ? `<h2>${esc(a.inst)}에서 지금 받는 공고</h2><div class="grid">${same.map((y) => card(y, '../')).join('')}</div>` : ''}
+${nearMore(a.inst)}
 <p class="btns"><a class="btn p" href="../jobs.html">지금 받는 공고 전체 보기</a>${a.url ? `<a class="btn" href="${esc(a.url)}" rel="nofollow noreferrer" target="_blank">원문 공고 (보관)</a>` : ''}</p>`, { depth: 1, noindex: true, desc: `${a.inst} 채용 공고 (마감)` }));
     kept++;
   }
