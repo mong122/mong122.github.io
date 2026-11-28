@@ -154,9 +154,9 @@ const STRIP = (up) => { const t = items.filter((x) => dleft(x.end) === 0).length
 const page = (title, body, { depth = 0, on = '', desc = '', noindex = false } = {}) => {
   const up = '../'.repeat(depth);
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(title)} | ${SITE}</title><meta name="description" content="${esc(desc || title)}"><meta name="naver-site-verification" content="df52554a05ebd239836020e9067fc5e6100e513e">${noindex ? '<meta name="robots" content="noindex,follow">' : ''}<link rel="stylesheet" href="${up}site.css?v=${BUILD}"><link rel="icon" href="${up}favicon.svg" type="image/svg+xml"><meta property="og:site_name" content="${SITE}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc || title)}"><meta property="og:image" content="${SITE_URL}/og.png"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"></head><body>
+<title>${esc(title)} | ${SITE}</title><meta name="description" content="${esc(desc || title)}"><meta name="naver-site-verification" content="df52554a05ebd239836020e9067fc5e6100e513e">${noindex ? '<meta name="robots" content="noindex,follow">' : ''}<link rel="stylesheet" href="${up}site.css?v=${BUILD}"><link rel="icon" href="${up}favicon.svg" type="image/svg+xml"><meta property="og:site_name" content="${SITE}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc || title)}"><meta property="og:image" content="${SITE_URL}/og-mongnote.png"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"></head><body>
 <header class="top"><div class="wrap"><a class="logo" href="${up}index.html">mong<b>note</b></a>
-<nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}lh.html" class="${on === 'lh' ? 'on' : ''}">청약·임대</a>${fs.existsSync(path.join(DATA, 'pool-rates.json')) ? `<a href="${up}rates.html" class="${on === 'rates' ? 'on' : ''}">예적금 금리</a>` : ''}<a href="${up}guides.html" class="${on === 'guides' ? 'on' : ''}">제도 안내</a><a href="${up}orgs.html" class="${on === 'orgs' ? 'on' : ''}">기관 정보</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">실수령 계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>${STRIP(up)}
+<nav><a href="${up}index.html" class="${on === 'home' ? 'on' : ''}">이번 주 마감</a><a href="${up}jobs.html" class="${on === 'jobs' ? 'on' : ''}">전체 공고</a><a href="${up}benefits.html" class="${on === 'benefits' ? 'on' : ''}">지원금 찾기</a><a href="${up}lh.html" class="${on === 'lh' ? 'on' : ''}">청약·임대</a>${fs.existsSync(path.join(DATA, 'pool-rates.json')) ? `<a href="${up}rates.html" class="${on === 'rates' ? 'on' : ''}">예적금 금리</a>` : ''}<a href="${up}guides.html" class="${on === 'guides' ? 'on' : ''}">제도 안내</a><a href="${up}orgs.html" class="${on === 'orgs' ? 'on' : ''}">기관 정보</a><a href="${up}calc.html" class="${on === 'calc' ? 'on' : ''}">계산기</a><a href="${up}saved.html" class="${on === 'saved' ? 'on' : ''}">찜한 공고 <b id="savedCnt"></b></a></nav></div></header>${STRIP(up)}
 <main class="wrap">${body}</main><script src="${up}site.js?v=${BUILD}"></script>
 <footer class="wrap"><div class="blogline">매일 새 공고 소식은 <a href="https://blog.naver.com/eleode123" rel="noopener" target="_blank">MONG 생활노트 블로그</a>에서도 받아 볼 수 있습니다.</div>공공 자료를 모아 정리했습니다. 지원·신청 전 원문을 확인해 주세요. · <a href="${up}about.html" style="text-decoration:underline">소개</a> · <a href="${up}privacy.html" style="text-decoration:underline">개인정보처리방침</a> · ${today} 기준</footer></body></html>`;
 };
@@ -194,7 +194,7 @@ fs.mkdirSync(path.join(OUT, 'job'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'org'), { recursive: true });
 BUILD = require('crypto').createHash('sha1').update(CSS + 'js3').digest('hex').slice(0, 8); // CSS·site.js 가 바뀔 때만 바뀜 (site.js 고치면 'js3' 숫자 올리기)
 fs.writeFileSync(path.join(OUT, 'site.css'), CSS);
-for (const f of ['favicon.svg', 'og.png']) if (fs.existsSync(path.join(__dirname, 'assets', f))) fs.copyFileSync(path.join(__dirname, 'assets', f), path.join(OUT, f)); // 🖼 탭 아이콘 · 공유 미리보기 그림
+for (const f of ['favicon.svg', 'og.png', 'og-mongnote.png']) if (fs.existsSync(path.join(__dirname, 'assets', f))) fs.copyFileSync(path.join(__dirname, 'assets', f), path.join(OUT, f)); // 🖼 탭 아이콘 · 공유 미리보기 그림
 // ⭐ 찜하기 (11/27 제미나이 2 "출퇴근길에 폰으로 훑고 나중에 지원") — 이 기기 localStorage 만, 서버·로그인 없음
 fs.writeFileSync(path.join(OUT, 'site.js'), `(()=>{const K='mongSaved';const get=()=>{try{return JSON.parse(localStorage.getItem(K)||'{}')}catch(e){return {}}};const put=v=>localStorage.setItem(K,JSON.stringify(v));
 const base=(document.querySelector('link[rel=stylesheet]').getAttribute('href')||'').replace(/site\.css.*$/,'');
@@ -347,7 +347,7 @@ ${w && w.sources.length ? `<h2>출처</h2><div class="box" style="white-space:no
 
 // 💰 공공기관 신입 초임 순위 (11/27 — 사이트 계획 "공공기관 초봉 순위", 우리가 모아 줄 세운 표 = 손이 간 내용)
 fs.writeFileSync(path.join(OUT, 'pay-rank.html'), page('공공기관 신입 초임 순위', `<h1>공공기관 신입 초임 순위</h1><p class="lead">공공기관 ${payRank.length}곳 신입 초임 · 알리오 공시 ${esc((payRank[0] || [, {}])[1].year || '')} 기준</p>
-<div class="box" style="white-space:normal;margin:12px 0"><b>초임 숫자 읽는 법</b><div>· 알리오 경영공시의 "신입사원 초임"이에요. 대학 졸업·사무직·군 미필·경력 없는 사람이 가장 낮은 직급으로 들어갈 때 1년 동안 받는 돈(세금 떼기 전)이에요.</div><div>· 기본급에 각종 수당과 성과급이 들어 있어요. 성과급은 기관 평가에 따라 해마다 달라져요.</div><div>· 기술직·연구직·의료직처럼 직무가 다르거나 경력이 있으면 실제 급여는 달라요. 지원할 공고의 보수 칸을 꼭 함께 보세요.</div><div>· 한 달에 실제로 얼마 받는지는 <a href="calc.html" style="text-decoration:underline">실수령 계산기</a>로 대략 볼 수 있어요.</div></div>
+<div class="box" style="white-space:normal;margin:12px 0"><b>초임 숫자 읽는 법</b><div>· 알리오 경영공시의 "신입사원 초임"이에요. 대학 졸업·사무직·군 미필·경력 없는 사람이 가장 낮은 직급으로 들어갈 때 1년 동안 받는 돈(세금 떼기 전)이에요.</div><div>· 기본급에 각종 수당과 성과급이 들어 있어요. 성과급은 기관 평가에 따라 해마다 달라져요.</div><div>· 기술직·연구직·의료직처럼 직무가 다르거나 경력이 있으면 실제 급여는 달라요. 지원할 공고의 보수 칸을 꼭 함께 보세요.</div><div>· 한 달에 실제로 얼마 받는지는 <a href="calc.html" style="text-decoration:underline">계산기</a>로 대략 볼 수 있어요.</div></div>
 <div class="filters"><input id="pq" placeholder="기관 찾기" style="flex:1 1 220px"></div>
 <table id="pt" class="rank"><tr><th>순위</th><th>기관</th><th>신입 초임</th><th class="now">지금 공고</th></tr>${payRank.map(([k, v], i) => `<tr data-q="${esc(k.toLowerCase())}"><td>${payRank.findIndex(([, w]) => w.total === v.total) + 1}</td><td><a href="org/${slug(k)}.html" style="text-decoration:underline">${esc(k)}</a> </td><td style="white-space:nowrap"><b>약 ${man(v.total)}</b></td><td class="now">${(orgs[k] || []).length ? `${orgs[k].length}건` : '-'}</td></tr>`).join('')}</table>
 <p class="note">초임은 공시 기준이라 실제 급여와 다를 수 있어요. 지원 전 공고문의 보수를 꼭 확인하세요.</p>
@@ -414,12 +414,13 @@ fs.writeFileSync(path.join(OUT, 'about.html'), page('소개', `<h1>${SITE} 소�
 <p>공고와 지원 내용은 바뀔 수 있습니다. 지원·신청 전 원문을 꼭 확인해 주세요.</p>
 <p><b>문의</b></p>
 <p><a href="mailto:eleode122@gmail.com" style="text-decoration:underline">eleode122@gmail.com</a></p></div>`, { desc: `공공기관 채용과 정부 지원 정보를 한곳에서 볼 수 있도록 정리한 ${SITE} 소개` }));
+require('./calcs.js')({ fs, path, OUT, page }); // 🧮 퇴직금·실업급여·청약 가점 (11/28)
 fs.writeFileSync(path.join(OUT, '404.html'), page('없는 쪽', `<h1>찾는 쪽이 없어요</h1><p class="lead">마감이 지나 내려간 공고일 수 있어요.</p><p><a class="btn p" href="/index.html">이번 주 마감 공고 보기</a></p>`, { noindex: true }));
 
 // 🔎 검색 엔진용 (sitemap = 검색에 보일 쪽만 · noindex 쪽은 뺌) · SITE_URL = 올릴 주소 (도메인 사면 바꿈)
 const BASE = (process.env.SITE_URL || 'https://mongnote.com').replace(/\/$/, '');
 const indexable = [];
-for (const rel of ['index.html', 'jobs.html', 'about.html', 'calc.html', 'pay-rank.html', 'orgs.html', 'benefits.html', 'guides.html', 'lh.html', 'rates.html', ...(fs.existsSync(path.join(OUT, 'guide')) ? fs.readdirSync(path.join(OUT, 'guide')).map((f) => 'guide/' + f) : []), ...fs.readdirSync(path.join(OUT, 'job')).map((f) => 'job/' + f), ...fs.readdirSync(path.join(OUT, 'org')).map((f) => 'org/' + f)]) {
+for (const rel of ['index.html', 'jobs.html', 'about.html', 'calc.html', 'severance.html', 'unemployment.html', 'cheongyak.html', 'pay-rank.html', 'orgs.html', 'benefits.html', 'guides.html', 'lh.html', 'rates.html', ...(fs.existsSync(path.join(OUT, 'guide')) ? fs.readdirSync(path.join(OUT, 'guide')).map((f) => 'guide/' + f) : []), ...fs.readdirSync(path.join(OUT, 'job')).map((f) => 'job/' + f), ...fs.readdirSync(path.join(OUT, 'org')).map((f) => 'org/' + f)]) {
   if (!fs.existsSync(path.join(OUT, rel))) continue;
   const h = fs.readFileSync(path.join(OUT, rel), 'utf8');
   if (!/name="robots" content="noindex/.test(h)) indexable.push(rel);
